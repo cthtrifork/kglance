@@ -5,6 +5,8 @@
     "config:recommended",
     // Actions stay pinned to a commit SHA with a `# vX.Y.Z` comment.
     "helpers:pinGitHubActionDigests",
+    // Container images (the Fedora job container) are pinned by digest too.
+    "docker:pinDigests",
   ],
   labels: ["dependencies"],
 
@@ -86,6 +88,13 @@
       // Wails' purego backend is experimental: a bump is reviewed on a real desktop before it merges.
       matchPackageNames: ["github.com/ebitengine/purego"],
       automerge: false,
+    },
+    {
+      // Fedora 44 is the only supported platform: a new Fedora release is a decision, not an update.
+      // Digest updates of the pinned fedora:44 image still come through.
+      matchDepNames: ["registry.fedoraproject.org/fedora"],
+      matchUpdateTypes: ["major", "minor"],
+      enabled: false,
     },
     {
       // Vite 8 ships a native bundler that needs a newer CPU baseline than the development VM has.

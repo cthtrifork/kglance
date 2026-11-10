@@ -1,6 +1,7 @@
 import { Events } from "@wailsio/runtime";
 import { Hide, Info } from "../bindings/github.com/cthtrifork/kglance/internal/popup/service.js";
 import { State } from "../bindings/github.com/cthtrifork/kglance/internal/power/service.js";
+import { demoState } from "./demo.js";
 import { describePower } from "./format.js";
 
 const $ = (id) => document.getElementById(id);
@@ -45,6 +46,7 @@ function stopClock() {
 function renderPower(state) {
   const view = describePower(state);
   $("power").dataset.kind = view.kind;
+  $("power").dataset.low = String(view.low);
   $("power-title").textContent = view.title;
   $("power-detail").textContent = view.detail;
   $("power-bar").hidden = view.percent === null;
@@ -67,6 +69,14 @@ Events.On("popup:shown", () => {
 Events.On("popup:hidden", stopClock);
 Events.On("power:changed", (event) => renderPower(event.data));
 
+// `vite dev` with ?demo=battery|charging|ac shows a fixed power state without the Go side (screenshots,
+// design work). The branch is dead code in a production build.
+const demo = import.meta.env.DEV ? demoState(location.search) : null;
+
 renderClock();
-refreshInfo();
-State().then(renderPower);
+if (demo) {
+  renderPower(demo);
+} else {
+  refreshInfo();
+  State().then(renderPower);
+}

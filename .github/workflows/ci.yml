@@ -122,6 +122,12 @@ jobs:
           cache: true
           cache-dependency-path: go.sum
 
+      # The frontend's unit tests use node's own runner and need no npm packages.
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .tool-versions
+          package-manager-cache: false
+
       # No frontend build: frontend/dist/.gitkeep satisfies go:embed, and nothing here reads the bundle.
       # The build is CGO-free (purego), so no GTK headers are needed. The race detector needs cgo, hence gcc
       # (preinstalled on the runner).

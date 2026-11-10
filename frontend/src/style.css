@@ -36,3 +36,61 @@ footer {
   font-size: 10px;
   opacity: 0.6;
 }
+
+.time {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+}
+
+#time {
+  font-size: 44px;
+  font-weight: 300;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.1;
+}
+
+#seconds {
+  font-size: 15px;
+  opacity: 0.6;
+  font-variant-numeric: tabular-nums;
+}
+
+#date {
+  margin-top: 2px;
+  font-size: 12px;
+  opacity: 0.7;
+}
+
+hr {
+  border: 0;
+  border-top: 1px solid color-mix(in srgb, CanvasText 12%, transparent);
+  margin: 14px 0;
+}
+
+#power-title {
+  font-size: 18px;
+  font-weight: 600;
+}
+
+#power-detail {
+  font-size: 11px;
+  opacity: 0.7;
+}
+
+#power-bar {
+  margin-top: 10px;
+  height: 6px;
+  border-radius: 3px;
+  background: color-mix(in srgb, CanvasText 15%, transparent);
+  overflow: hidden;
+}
+
+#power-fill {
+  height: 100%;
+  background: currentColor;
+}
+
+footer {
+  margin-top: 14px;
+}

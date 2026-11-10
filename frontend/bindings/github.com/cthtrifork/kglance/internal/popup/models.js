@@ -26,7 +26,7 @@ export class Info {
         }
         if (!("shortcut" in $$source)) {
             /**
-             * Shortcut is the current global shortcut, as text such as "Meta+Alt+G".
+             * Shortcut is the current global shortcut, as text such as "Meta+Alt+G"; empty when there is none.
              * @member
              * @type {string}
              */

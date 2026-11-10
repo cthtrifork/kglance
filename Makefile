@@ -23,7 +23,7 @@ endif
 RACE ?=
 
 .DEFAULT_GOAL := help
-.PHONY: help fmt format lint lint-go lint-frontend tools format-frontend vet test check frontend wails3-install bindings build run clean
+.PHONY: help fmt format lint lint-go lint-frontend tools format-frontend vet test check frontend wails3-install bindings build rpm run clean
 
 help: ## List the targets
 	@awk -F':.*## ' '/^[a-zA-Z_-]+:.*## /{printf "  %-17s %s\n", $$1, $$2}' $(MAKEFILE_LIST)
@@ -82,6 +82,9 @@ bindings: ## Regenerate frontend/bindings from the Go services (needs the wails3
 
 build: frontend ## Release build of the single binary (see BACKEND above)
 	$(GOENV) go build -tags $(GOTAGS) -trimpath -buildvcs=false -ldflags "-w -s -X $(MODULE)/internal/version.Version=$(VERSION)" -o $(OUT) .
+
+rpm: build ## Build the Fedora rpm into dist/ (needs the wails3 CLI, see wails3-install)
+	scripts/package-linux.sh $(OUT) $(VERSION) dist
 
 run: frontend ## Run the app from source (needs a Wayland or X11 session with GTK4 and WebKitGTK 6)
 	$(GOENV) go run $(if $(RUNTAGS),-tags $(RUNTAGS)) .

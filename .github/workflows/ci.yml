@@ -148,7 +148,7 @@ jobs:
     steps:
       - name: Install tools and the runtime libraries
         run: |
-          dnf install -y --setopt=install_weak_deps=False make git gcc tar gzip \
+          dnf install -y --setopt=install_weak_deps=False make git gcc tar gzip desktop-file-utils \
             gtk4 webkitgtk6.0 libsoup3 gtk4-layer-shell
           cat /etc/os-release | grep PRETTY_NAME
 
@@ -184,10 +184,30 @@ jobs:
             if ldconfig -p | grep -q "$lib"; then echo "ok   $lib"; else echo "::error::missing $lib"; exit 1; fi
           done
 
-      - name: Keep the binary for reviewers
+      - name: Validate the desktop files
+        run: desktop-file-validate build/linux/*.desktop
+
+      # The rpm is what users install. Installing it here proves the dependency names exist on Fedora 44.
+      - name: Package the rpm
+        run: |
+          GOBIN="$RUNNER_TEMP/bin" make wails3-install
+          PATH="$RUNNER_TEMP/bin:$PATH" scripts/package-linux.sh dist/kglance "ci-${GITHUB_SHA::7}" dist
+          ls -l dist
+
+      - name: The rpm installs on Fedora 44
+        run: |
+          dnf install -y dist/*.rpm
+          rpm -qi kglance
+          kglance --version
+          test -f /etc/xdg/autostart/io.github.cthtrifork.kglance.desktop
+          test -f /usr/share/applications/io.github.cthtrifork.kglance.desktop
+
+      - name: Keep the binary and the rpm for reviewers
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
-          name: kglance-linux-amd64
-          path: dist/kglance
+          name: kglance-fedora-44
+          path: |
+            dist/kglance
+            dist/*.rpm
           if-no-files-found: error
           retention-days: 7

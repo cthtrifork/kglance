@@ -33,7 +33,12 @@ func main() {
 	_ = layershell.Preload()
 
 	showVersion := flag.Bool("version", false, "print the version and exit")
-	toggleFlag := flag.Bool("toggle", false, "toggle the popup of the running instance (starts the app if none runs)")
+	// Not read here: a second launch with --toggle is handled in OnSecondInstanceLaunch, and a first
+	// launch shows the popup anyway. It is declared so flag.Parse accepts it.
+	// Not read here: a second launch with --toggle is handled in OnSecondInstanceLaunch, and a first
+	// launch shows the popup anyway. It is declared so flag.Parse accepts it.
+	_ = flag.Bool("toggle", false, "toggle the popup of the running instance (starts the app if none runs)")
+	background := flag.Bool("background", false, "start without showing the popup (what the autostart entry uses)")
 	flag.Parse()
 	if *showVersion {
 		fmt.Println("kglance", version.Version)
@@ -90,7 +95,8 @@ func main() {
 
 	p := popup.New(app, svc)
 	pop.Store(p)
-	if *toggleFlag {
+	// A first launch from the menu or with --toggle shows the popup; autostart does not.
+	if !*background {
 		p.ShowWhenReady()
 	}
 

@@ -1,0 +1,38 @@
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  height: 100%;
+  background: transparent;
+  overflow: hidden;
+  font-family: system-ui, sans-serif;
+  user-select: none;
+  cursor: default;
+}
+
+#backdrop {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#card {
+  width: 270px;
+  padding: 18px 20px 12px;
+  border-radius: 12px;
+  background: Canvas;
+  color: CanvasText;
+  border: 1px solid color-mix(in srgb, CanvasText 12%, transparent);
+  box-shadow: 0 10px 30px rgb(0 0 0 / 0.35);
+}
+
+footer {
+  display: flex;
+  justify-content: space-between;
+  font-size: 10px;
+  opacity: 0.6;
+}

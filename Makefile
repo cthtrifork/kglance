@@ -23,7 +23,7 @@ endif
 RACE ?=
 
 .DEFAULT_GOAL := help
-.PHONY: help fmt format lint lint-go lint-frontend tools format-frontend vet test check frontend build run clean
+.PHONY: help fmt format lint lint-go lint-frontend tools format-frontend vet test check frontend wails3-install bindings build run clean
 
 help: ## List the targets
 	@awk -F':.*## ' '/^[a-zA-Z_-]+:.*## /{printf "  %-17s %s\n", $$1, $$2}' $(MAKEFILE_LIST)
@@ -70,6 +70,12 @@ check: ## What CI checks without a C toolchain: gofmt, tidy, vet, tests
 
 frontend: ## Build the frontend into frontend/dist (embedded by the Go binary)
 	cd frontend && npm ci --ignore-scripts --no-audit --no-fund && npm run build
+
+wails3-install: ## Install the wails3 CLI at the go.mod version into GOBIN
+	CGO_ENABLED=0 go install -tags purego github.com/wailsapp/wails/v3/cmd/wails3@$$(go list -m -f '{{.Version}}' github.com/wailsapp/wails/v3)
+
+bindings: ## Regenerate frontend/bindings from the Go services (needs the wails3 CLI)
+	CGO_ENABLED=0 wails3 generate bindings -f "-tags purego" -silent
 
 ## Build and run ------------------------------------------------------------
 

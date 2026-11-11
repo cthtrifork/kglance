@@ -23,7 +23,7 @@ endif
 RACE ?=
 
 .DEFAULT_GOAL := help
-.PHONY: help fmt format lint lint-go lint-frontend tools format-frontend vet test check frontend frontend-wasm wails3-install bindings screenshots build rpm run clean
+.PHONY: help fmt format lint lint-go lint-frontend tools format-frontend vet test check dev frontend frontend-wasm wails3-install bindings screenshots build rpm run clean
 
 help: ## List the targets
 	@awk -F':.*## ' '/^[a-zA-Z_-]+:.*## /{printf "  %-17s %s\n", $$1, $$2}' $(MAKEFILE_LIST)
@@ -68,6 +68,9 @@ check: ## What CI checks without a C toolchain: gofmt, tidy, vet, tests
 	@unformatted="$$(gofmt -l .)"; if [ -n "$$unformatted" ]; then echo "These files need gofmt:"; echo "$$unformatted"; exit 1; fi
 	go mod tidy -diff
 	$(MAKE) vet test
+
+dev: ## Vite dev server on http://127.0.0.1:9245 with hot reload; add ?demo=battery|charging|low|ac for a fixed power state
+	cd frontend && ([ -d node_modules ] || npm ci --ignore-scripts --no-audit --no-fund) && npm run dev
 
 frontend: ## Build the frontend into frontend/dist (embedded by the Go binary)
 	cd frontend && npm ci --ignore-scripts --no-audit --no-fund && npm run build

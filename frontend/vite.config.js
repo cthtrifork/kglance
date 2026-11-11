@@ -11,6 +11,7 @@ const keepPlaceholder = () => ({
 });
 
 export default defineConfig({
-  server: { host: "127.0.0.1", port: Number(process.env.WAILS_VITE_PORT) || 9245, strictPort: true },
+  // VITE_HOST=0.0.0.0 in the dev container, so the editor's port forward can reach the server.
+  server: { host: process.env.VITE_HOST || "127.0.0.1", port: Number(process.env.WAILS_VITE_PORT) || 9245, strictPort: true },
   plugins: [keepPlaceholder()],
 });

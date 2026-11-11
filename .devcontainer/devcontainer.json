@@ -7,16 +7,18 @@
     // The build is CGO-free (Wails' purego backend): no GTK, no C compiler. Every go command needs the tag.
     "CGO_ENABLED": "0",
     "GOFLAGS": "-tags=purego",
-    // The frontend dev server (`cd frontend && npm run dev`) listens here; ?demo=battery|charging|low|ac shows
-    // the popup in a fixed power state without the Go side. Bind to all interfaces so the editor's port
-    // forward reaches it.
-    "WAILS_VITE_PORT": "9245"
+    // The frontend dev server (`make dev`) listens here; ?demo=battery|charging|low|ac shows the popup in a
+    // fixed power state without the Go side. It binds to all interfaces because editors forward the port to
+    // the container's network address, not its loopback ("connection was reset" otherwise). Only the
+    // editor's forward exposes it on the host.
+    "WAILS_VITE_PORT": "9245",
+    "VITE_HOST": "0.0.0.0"
   },
   // Installs the frontend packages, the Go modules, the wails3 CLI (`make bindings`) and the Go dev tools.
   "postCreateCommand": "bash .devcontainer/post-create.sh",
   "forwardPorts": [9245],
   "portsAttributes": {
-    "9245": { "label": "Popup (npm run dev, add ?demo=charging)" }
+    "9245": { "label": "Popup (make dev, add ?demo=charging)", "onAutoForward": "notify" }
   },
   "customizations": {
     "vscode": {

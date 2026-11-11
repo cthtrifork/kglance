@@ -2,7 +2,7 @@
 
 KGlance is a tiny popup/widget for KDE Plasma. Press a shortcut, it appears. Click somewhere else, or hit Escape, and it vanishes like it was never there.
 
-It shows the time, the date and the power status: battery percentage, charging state and time left, or "On AC" on a machine without a battery. Battery changes show up live, and nothing ticks while the popup is hidden.
+It shows the time, the date, the power status and memory use. Power is the battery percentage, charging state and time left, or "On AC" on a machine without a battery; memory is used of total, with swap when it is in use, and turns red when nearly full. Battery changes show up live, memory is read every two seconds, and nothing ticks while the popup is hidden.
 
 Inspired by [Lusan-sapkota/KGlance](https://github.com/Lusan-sapkota/KGlance), and much simpler: one Go binary, no world clock, no calendar, no notification history.
 

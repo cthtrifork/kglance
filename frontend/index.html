@@ -29,11 +29,26 @@
               <path d="M9 2v5M15 2v5M6 7h12v4a6 6 0 0 1-12 0V7zM12 17v5" />
             </svg>
             <div class="power-text">
-              <div id="power-title"></div>
-              <div id="power-detail"></div>
+              <div id="power-title" class="title"></div>
+              <div id="power-detail" class="detail"></div>
             </div>
           </div>
-          <div id="power-bar" hidden><div id="power-fill"></div></div>
+          <div id="power-bar" class="bar" hidden><div id="power-fill" class="fill"></div></div>
+        </section>
+        <hr id="memory-rule" hidden />
+        <section id="memory" data-level="normal" hidden>
+          <div class="power-main">
+            <svg class="icon icon-chip" viewBox="0 0 24 24" aria-hidden="true">
+              <rect x="5" y="5" width="14" height="14" rx="2" />
+              <rect x="9" y="9" width="6" height="6" rx="1" />
+              <path d="M9 2v3M15 2v3M9 19v3M15 19v3M2 9h3M2 15h3M19 9h3M19 15h3" />
+            </svg>
+            <div class="power-text">
+              <div id="memory-title" class="title"></div>
+              <div id="memory-detail" class="detail"></div>
+            </div>
+          </div>
+          <div class="bar"><div id="memory-fill" class="fill"></div></div>
         </section>
         <footer>
           <span id="shortcut-hint"><span id="shortcut">Meta+Alt+G</span> to toggle</span>

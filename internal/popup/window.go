@@ -36,7 +36,7 @@ func New(app *application.App, svc *Service) *Popup {
 		Hidden: true,
 		// Used when layer-shell is not available; with layer-shell the compositor sizes the surface.
 		Width:         340,
-		Height:        300,
+		Height:        400,
 		Frameless:     true,
 		DisableResize: true,
 		AlwaysOnTop:   true,

@@ -28,7 +28,7 @@ let failed = false;
 try {
   for (const colorScheme of schemes) {
     const context = await browser.newContext({
-      viewport: { width: 340, height: 300 },
+      viewport: { width: 340, height: 400 },
       deviceScaleFactor: 2,
       colorScheme,
       locale: "en-GB",

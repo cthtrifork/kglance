@@ -58,7 +58,7 @@ func main() {
 			p.Toggle()
 		}
 	}
-	keys := shortcut.New(toggle)
+	keys := shortcut.New()
 	svc := popup.NewService(keys.Text)
 
 	// The power monitor sends its changes to the page as events; it is built first because the service

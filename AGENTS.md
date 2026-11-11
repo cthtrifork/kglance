@@ -40,7 +40,7 @@ make screenshots    # popup in every demo state (light; dark for one example) in
 | `internal/layershell` | `gtk4-layer-shell` through purego: centres a full-screen overlay on the active output |
 | `internal/gtkstyle` | CSS through purego that makes the GtkWindow background transparent (Wails only makes the web view transparent) |
 | `internal/popup` | Window controller: show, hide, toggle, hide on Escape, backdrop click and focus loss |
-| `internal/shortcut` | KGlobalAccel registration and the `globalShortcutPressed` listener (godbus) |
+| `internal/shortcut` | KGlobalAccel registration (godbus): creates the launcher component and reads back the active key; the key itself runs the `toggle` desktop action in `build/linux` |
 | `internal/power` | UPower reader and property-change subscription |
 | `internal/memory` | Memory use from `/proc/meminfo`, read by the page every two seconds while the popup is shown |
 | `internal/osupdate` | OS update pill (staged, none or unknown): `rpm-ostree status --json` (works without root, reads only local state), asked each time the popup is shown |

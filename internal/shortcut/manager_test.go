@@ -61,7 +61,7 @@ func TestRegisterUsesDefaultWhenNothingSaved(t *testing.T) {
 }
 
 func TestRegisterKeepsTheUsersBinding(t *testing.T) {
-	m := New(func() {})
+	m := New()
 	f := &fakeAccel{saved: []int32{modCtrl | modAlt | 'K'}}
 	if err := m.registerWith(f); err != nil {
 		t.Fatal(err)
@@ -72,7 +72,7 @@ func TestRegisterKeepsTheUsersBinding(t *testing.T) {
 }
 
 func TestClearedShortcutHasNoText(t *testing.T) {
-	m := New(func() {})
+	m := New()
 	f := &fakeAccel{saved: []int32{0}}
 	if err := m.registerWith(f); err != nil {
 		t.Fatal(err)
@@ -83,7 +83,7 @@ func TestClearedShortcutHasNoText(t *testing.T) {
 }
 
 func TestTextStartsAsTheDefault(t *testing.T) {
-	if got := New(func() {}).Text(); got != DefaultShortcut {
+	if got := New().Text(); got != DefaultShortcut {
 		t.Fatalf("Text() = %q", got)
 	}
 }
@@ -92,30 +92,6 @@ func TestRegisterReportsErrors(t *testing.T) {
 	f := &fakeAccel{registerE: errors.New("no such service")}
 	if _, err := register(f, 1); err == nil {
 		t.Fatal("register succeeded, want an error")
-	}
-}
-
-func TestIsPressed(t *testing.T) {
-	press := func(component, action string) *dbus.Signal {
-		return &dbus.Signal{Name: componentInterface + "." + pressedMember, Body: []any{component, action, int64(1)}}
-	}
-	cases := []struct {
-		name string
-		sig  *dbus.Signal
-		want bool
-	}{
-		{"ours", press(Component, Action), true},
-		{"another app", press("org.kde.dolphin.desktop", "toggle"), false},
-		{"another action", press(Component, "other"), false},
-		{"released", &dbus.Signal{Name: componentInterface + ".globalShortcutReleased", Body: []any{Component, Action, int64(1)}}, false},
-		{"short body", &dbus.Signal{Name: componentInterface + "." + pressedMember, Body: []any{Component}}, false},
-		{"wrong types", &dbus.Signal{Name: componentInterface + "." + pressedMember, Body: []any{1, 2, 3}}, false},
-		{"nil", nil, false},
-	}
-	for _, c := range cases {
-		if got := IsPressed(c.sig); got != c.want {
-			t.Errorf("%s: IsPressed = %v, want %v", c.name, got, c.want)
-		}
 	}
 }
 

@@ -70,14 +70,15 @@
       groupName: "golangci-lint",
     },
     {
-      // One Go version everywhere: golang in .tool-versions (read by setup-go) and go in go.mod.
+      // One Go version everywhere: golang in .tool-versions (read by setup-go), go in go.mod and the golang image
+      // of the dev container.
       // Reviewed by hand: a new toolchain can change build output.
-      matchDepNames: ["go", "golang"],
+      matchDepNames: ["go", "golang", "mirror.gcr.io/library/golang"],
       groupName: "go toolchain",
       automerge: false,
     },
     {
-      matchDepNames: ["nodejs", "node"],
+      matchDepNames: ["nodejs", "node", "mirror.gcr.io/library/node"],
       groupName: "node",
       automerge: false,
     },

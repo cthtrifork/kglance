@@ -12,8 +12,9 @@ Why things are the way they are: [`docs/decisions.md`](docs/decisions.md). Do no
 make check          # gofmt, go mod tidy -diff, vet (with and without -tags production), tests; no C toolchain needed
 make lint           # golangci-lint plus Biome and knip for the frontend
 make format         # gofmt plus Biome
+make dev            # Vite dev server with hot reload (add ?demo=charging); the dev container forwards it, see docs/devcontainer.md
 make frontend       # frontend -> frontend/dist (embedded by the binary); needed before build/run, not before vet/test
-make frontend-wasm  # same as `make frontend`, for a CPU without AVX2 (Vite 8's native bundler crashes there): Node 26 in podman with Rolldown's WebAssembly build
+make frontend-wasm  # same as `make frontend`, for a CPU without AVX2 (Vite 8's native bundler crashes there): Rolldown's WebAssembly build on Node 26, directly in the dev container or in its image via podman
 make build          # release binary, CGO-free (BACKEND=cgo for Wails' cgo backend)
 make rpm            # the Fedora package (needs the wails3 CLI)
 make screenshots    # popup in every demo state, light and dark, into screenshots/ (needs Playwright's Chromium; CI renders them too)
@@ -41,5 +42,6 @@ make screenshots    # popup in every demo state, light and dark, into screenshot
 | `internal/shortcut` | KGlobalAccel registration and the `globalShortcutPressed` listener (godbus) |
 | `internal/power` | UPower reader and property-change subscription |
 | `frontend/` | Vanilla JS + Vite; `bindings/` is generated (committed); `dist/` is build output |
+| `.devcontainer/` | Go 1.27 + Node 26 dev container, see [`docs/devcontainer.md`](docs/devcontainer.md) |
 | `build/linux/` | `.desktop` files, icons, nfpm config |
 | `.github/workflows` | `ci`, `security`, `actions-lint`, `pr-title`, `release-drafter`, `screenshots`, `renovate`, `update-branches`, `tag-release`, `release`; see [`docs/ci.md`](docs/ci.md) |

@@ -1,12 +1,12 @@
 # kglance
 
-KGlance is a tiny popup for KDE Plasma. Press a shortcut, it appears. Click somewhere else, or hit Escape, and it vanishes like it was never there.
+KGlance is a tiny popup/widget for KDE Plasma. Press a shortcut, it appears. Click somewhere else, or hit Escape, and it vanishes like it was never there.
 
 It shows the time, the date and the power status (battery percentage, charging state and time left, or "On AC" on a machine without a battery). Battery changes show up live.
 
 Inspired by [Lusan-sapkota/KGlance](https://github.com/Lusan-sapkota/KGlance), and much simpler: one Go binary, no world clock, no calendar, no notification history.
 
-**Status:** under construction. Fedora 44 with KDE Plasma 6 on Wayland is the only supported platform.
+![screenshot of widger](https://github.com/cthtrifork/kglance/blob/bot/update-screenshots/screenshots/popup-battery-light.png)
 
 ## Install
 

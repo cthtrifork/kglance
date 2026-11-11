@@ -62,16 +62,18 @@ async function refreshInfo() {
   document.documentElement.classList.toggle("layer", info.layer);
 }
 
-Events.On("popup:shown", () => {
-  startClock();
-  refreshInfo();
-});
-Events.On("popup:hidden", stopClock);
-Events.On("power:changed", (event) => renderPower(event.data));
-
-// `vite dev` with ?demo=battery|charging|ac shows a fixed power state without the Go side (screenshots,
-// design work). The branch is dead code in a production build.
+// `vite dev` with ?demo=battery|charging|low|ac shows a fixed power state without the Go side
+// (scripts/screenshots.mjs, design work). The branch is dead code in a production build.
 const demo = import.meta.env.DEV ? demoState(location.search) : null;
+
+if (!demo) {
+  Events.On("popup:shown", () => {
+    startClock();
+    refreshInfo();
+  });
+  Events.On("popup:hidden", stopClock);
+  Events.On("power:changed", (event) => renderPower(event.data));
+}
 
 renderClock();
 if (demo) {

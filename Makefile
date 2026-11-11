@@ -23,7 +23,7 @@ endif
 RACE ?=
 
 .DEFAULT_GOAL := help
-.PHONY: help fmt format lint lint-go lint-frontend tools format-frontend vet test check frontend wails3-install bindings build rpm run clean
+.PHONY: help fmt format lint lint-go lint-frontend tools format-frontend vet test check frontend wails3-install bindings screenshots build rpm run clean
 
 help: ## List the targets
 	@awk -F':.*## ' '/^[a-zA-Z_-]+:.*## /{printf "  %-17s %s\n", $$1, $$2}' $(MAKEFILE_LIST)
@@ -77,6 +77,9 @@ wails3-install: ## Install the wails3 CLI at the go.mod version into GOBIN
 
 bindings: ## Regenerate frontend/bindings from the Go services (needs the wails3 CLI)
 	CGO_ENABLED=0 wails3 generate bindings -f "-tags purego" -silent
+
+screenshots: ## Render the popup in every demo state into screenshots/ (needs `npx playwright-core install chromium` once)
+	cd frontend && npm ci --ignore-scripts --no-audit --no-fund && node scripts/screenshots.mjs ../screenshots
 
 ## Build and run ------------------------------------------------------------
 

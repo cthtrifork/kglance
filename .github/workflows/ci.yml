@@ -1,0 +1,166 @@
+name: CI
+
+# Runs on every pull request and on pushes to main. There is deliberately no paths filter, so the
+# checks below can be required status checks.
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+env:
+  # Fail on a Go version mismatch instead of silently downloading a toolchain.
+  GOTOOLCHAIN: local
+
+jobs:
+  # lint, test and build run in parallel: wall time is the slowest job, not their sum.
+  lint:
+    name: lint
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - id: go
+        uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          go-version-file: .tool-versions
+          check-latest: true # newest patch release of the version in .tool-versions, so stdlib fixes are picked up
+          cache: true
+          cache-dependency-path: go.sum
+
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .tool-versions
+          package-manager-cache: false
+
+      # The Go binary embeds frontend/dist, so the frontend is built first.
+      - name: Build frontend
+        run: |
+          node --version
+          make frontend
+
+      # Biome lint (frontend/biome.json), format check and knip (unused exports and dependencies).
+      # Run `npm run format` in frontend/ to fix formatting.
+      - name: Lint and check formatting (frontend)
+        run: make lint-frontend
+
+      - name: Check formatting
+        run: |
+          unformatted="$(gofmt -l .)"
+          if [ -n "$unformatted" ]; then echo "These files need gofmt:"; echo "$unformatted"; exit 1; fi
+
+      # Config in .github/linters/yamllint.yml.
+      - name: Lint YAML
+        env:
+          # renovate: datasource=pypi depName=yamllint
+          YAMLLINT_VERSION: 1.38.0
+        run: |
+          python3 -m pip install --user "yamllint==${YAMLLINT_VERSION}"
+          PATH="$HOME/.local/bin:$PATH" yamllint --strict -c .github/linters/yamllint.yml $(git ls-files '*.yml' '*.yaml')
+
+      - name: Check go.mod is tidy and modules verify
+        run: |
+          go mod tidy -diff
+          go mod verify
+
+      # Config in .github/linters/golangci.yml. The CGO-free (purego) build is what ships, so that is
+      # what is linted; the args mirror `make lint-go`. Renovate reads the version below itself and the
+      # Makefile pin carries the same depName, so they are bumped in one PR.
+      - name: golangci-lint
+        uses: golangci/golangci-lint-action@ba0d7d2ec06a0ea1cb5fa41b2e4a3ab91d21278a # v9.3.0
+        env:
+          CGO_ENABLED: '0'
+        with:
+          version: v2.15.0
+          args: --config .github/linters/golangci.yml --build-tags purego ./...
+
+  test:
+    name: test
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          go-version-file: .tool-versions
+          check-latest: true
+          cache: true
+          cache-dependency-path: go.sum
+
+      # No frontend build: frontend/dist/.gitkeep satisfies go:embed, and nothing here reads the bundle.
+      # The build is CGO-free (purego), so no GTK headers are needed. The race detector needs cgo, hence gcc
+      # (preinstalled on the runner).
+      - name: Vet
+        run: make vet
+
+      - name: Test
+        run: make test RACE=-race
+
+  # Builds on Fedora 44, the only supported platform. The binary does not link GTK (purego loads it at
+  # run time), so this job also installs the runtime libraries and checks that every library the app
+  # opens exists with the soname it asks for.
+  build:
+    name: build (Fedora 44)
+    runs-on: ubuntu-latest
+    # Pinned by digest (zizmor requires it); Renovate keeps the digest current, the Fedora release itself is a decision.
+    container: registry.fedoraproject.org/fedora:44@sha256:17c99e30075386f9385685a22ad1924e2c22faee5863272c0379c81b80b9d258
+    timeout-minutes: 25
+    steps:
+      - name: Install tools and the runtime libraries
+        run: |
+          dnf install -y --setopt=install_weak_deps=False make git gcc tar gzip \
+            gtk4 webkitgtk6.0 libsoup3 gtk4-layer-shell
+          cat /etc/os-release | grep PRETTY_NAME
+
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          go-version-file: .tool-versions
+          check-latest: true
+          cache: true
+          cache-dependency-path: go.sum
+
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .tool-versions
+          package-manager-cache: false
+
+      - name: Build
+        run: |
+          mkdir -p dist
+          make build VERSION="ci-${GITHUB_SHA::7}" OUT=dist/kglance
+          chmod +x dist/kglance
+          ls -l dist
+          dist/kglance --version
+
+      # The sonames the purego backend and the layer-shell loader open (internal/layershell and
+      # Wails' linux_purego_lib.go). A rename in a new Fedora would show up here, not on a user's desktop.
+      - name: Runtime libraries are present
+        run: |
+          for lib in libgtk-4.so.1 libwebkitgtk-6.0.so.4 libjavascriptcoregtk-6.0.so.1 libsoup-3.0.so.0 libgtk4-layer-shell.so.0; do
+            if ldconfig -p | grep -q "$lib"; then echo "ok   $lib"; else echo "::error::missing $lib"; exit 1; fi
+          done
+
+      - name: Keep the binary for reviewers
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: kglance-linux-amd64
+          path: dist/kglance
+          if-no-files-found: error
+          retention-days: 7

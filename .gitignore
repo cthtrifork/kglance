@@ -1,33 +1,50 @@
-# If you prefer the allow list template instead of the deny list, see community template:
-# https://github.com/github/gitignore/blob/main/community/Golang/Go.AllowList.gitignore
-#
-# Binaries for programs and plugins
+# Binaries and test output
 *.exe
-*.exe~
-*.dll
 *.so
 *.dylib
-
-# Test binary, built with `go test -c`
 *.test
-
-# Code coverage profiles and other test artifacts
 *.out
 coverage.*
 !coverage.go
 *.coverprofile
 profile.cov
+*.prof
 
-# Dependency directories (remove the comment below to include it)
-# vendor/
-
-# Go workspace file
+# Go workspace
 go.work
 go.work.sum
 
-# env file
-.env
+# Build output: `go build .` names the binary after the module, so it lands in the repo root.
+/kglance
+/bin/
+/dist/
 
-# Editor/IDE
-# .idea/
-# .vscode/
+# Frontend (Vite). dist/ is build output embedded by main.go; only the placeholder is tracked so
+# `go vet` and `go test` work before the frontend has been built.
+node_modules/
+frontend/node_modules/
+frontend/dist/*
+!frontend/dist/.gitkeep
+.vite/
+npm-debug.log*
+
+# Secrets and local state
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# Editors and OS
+.idea/
+*.iml
+*.swp
+*~
+.DS_Store
+
+# AI assistant local settings
+.claude/settings.local.json
+.claude/scratch/
+
+# Screenshots and scratch output
+/shots/

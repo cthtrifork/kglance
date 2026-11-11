@@ -1,0 +1,119 @@
+// Renovate config, read by the Renovate GitHub App (no self-hosted workflow). actions-lint.yml validates it.
+{
+  $schema: "https://docs.renovatebot.com/renovate-schema.json",
+  extends: [
+    "config:recommended",
+    // Actions stay pinned to a commit SHA with a `# vX.Y.Z` comment.
+    "helpers:pinGitHubActionDigests",
+    // Container images (the Fedora job container) are pinned by digest too.
+    "docker:pinDigests",
+  ],
+  labels: ["dependencies"],
+
+  // PR titles follow the repository convention `type: summary` (.github/workflows/pr-title.yml), so a Renovate PR
+  // reads `deps: update dependency knip to v6.44.0` and passes the PR title check.
+  semanticCommits: "enabled",
+  semanticCommitType: "deps",
+  semanticCommitScope: null,
+
+  // New releases wait 2 days, so a PR (and an automerge) never races a release that gets yanked or fixed.
+  minimumReleaseAge: "2 days",
+  internalChecksFilter: "strict",
+  postUpdateOptions: ["gomodTidy"],
+
+  dependencyDashboard: true,
+  dependencyDashboardTitle: "Dependency Dashboard",
+  dependencyDashboardLabels: ["dependencies"],
+  osvVulnerabilityAlerts: true,
+  prHourlyLimit: 5,
+  prConcurrentLimit: 10,
+  vulnerabilityAlerts: {
+    labels: ["dependencies", "security"],
+    semanticCommitType: "security",
+  },
+
+  // Rules apply in order and a later rule wins, so the general ones come first.
+  packageRules: [
+    {
+      // Patch and digest updates merge by themselves once CI is green. This needs branch protection that
+      // requires the CI checks: without them nothing stands between a PR and the merge.
+      matchUpdateTypes: ["patch", "digest"],
+      automerge: true,
+    },
+    {
+      matchManagers: ["github-actions"],
+      matchUpdateTypes: ["minor"],
+      groupName: "actions",
+    },
+    {
+      matchManagers: ["gomod"],
+      matchUpdateTypes: ["minor"],
+      groupName: "go-minor",
+    },
+    {
+      matchManagers: ["npm"],
+      matchUpdateTypes: ["minor"],
+      groupName: "frontend-minor",
+    },
+    {
+      // The Go dev tools (Makefile) and the yamllint, zizmor and gh-pin-actions pins (workflows).
+      matchManagers: ["custom.regex"],
+      matchUpdateTypes: ["minor", "major"],
+      groupName: "dev tools",
+    },
+    {
+      // golangci-lint: the Makefile pin and the `version:` of the action in ci.yml are one dependency.
+      matchPackageNames: ["golangci/golangci-lint", "golangci/golangci-lint-action"],
+      groupName: "golangci-lint",
+    },
+    {
+      // One Go version everywhere: golang in .tool-versions (read by setup-go) and go in go.mod.
+      // Reviewed by hand: a new toolchain can change build output.
+      matchDepNames: ["go", "golang"],
+      groupName: "go toolchain",
+      automerge: false,
+    },
+    {
+      matchDepNames: ["nodejs", "node"],
+      groupName: "node",
+      automerge: false,
+    },
+    {
+      // The wails3 CLI and the Go module are one version, and the npm runtime must match: one PR.
+      matchPackageNames: ["github.com/wailsapp/wails/v3", "@wailsio/runtime"],
+      groupName: "wails",
+      automerge: false,
+    },
+    {
+      // Wails' purego backend is experimental: a bump is reviewed on a real desktop before it merges.
+      matchPackageNames: ["github.com/ebitengine/purego"],
+      automerge: false,
+    },
+    {
+      // Fedora 44 is the only supported platform: a new Fedora release is a decision, not an update.
+      // Digest updates of the pinned fedora:44 image still come through.
+      matchDepNames: ["registry.fedoraproject.org/fedora"],
+      matchUpdateTypes: ["major", "minor"],
+      enabled: false,
+    },
+    {
+      // Vite 8 ships a native bundler that needs a newer CPU baseline than the development VM has.
+      // Bumping Vite is a decision, not a routine update.
+      matchPackageNames: ["vite"],
+      matchUpdateTypes: ["major"],
+      enabled: false,
+    },
+  ],
+
+  customManagers: [
+    {
+      // Versions with no manager of their own: a `# renovate: datasource=<ds> depName=<name>` comment on
+      // the line above a `KEY := value`, `KEY=value` or `KEY: value` line (the Makefile and workflows).
+      customType: "regex",
+      managerFilePatterns: ["/(^|/)Makefile$/", "/^\\.github/workflows/[^/]+\\.ya?ml$/"],
+      matchStrings: [
+        "# renovate: datasource=(?<datasource>\\S+) depName=(?<depName>\\S+)\\s+(?:ARG\\s+)?\\S+\\s*(?::=|=|:)\\s*['\"]?(?<currentValue>[^\\s'\"]+)",
+      ],
+    },
+  ],
+}

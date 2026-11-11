@@ -1,0 +1,19 @@
+{
+  "name": "kglance-frontend",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "lint": "biome lint .",
+    "format": "biome format --write .",
+    "format:check": "biome format .",
+    "knip": "knip"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "2.6.6",
+    "knip": "6.44.2",
+    "vite": "^7.0.0"
+  }
+}

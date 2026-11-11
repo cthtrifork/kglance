@@ -104,6 +104,19 @@ hr {
   --tone: var(--warn);
 }
 
+/* Memory row: same shape as the power row; red when memory is nearly full. */
+#memory {
+  --tone: var(--accent);
+}
+
+#memory[data-level="high"] {
+  --tone: var(--warn);
+}
+
+#memory .icon-chip {
+  display: block;
+}
+
 .power-main {
   display: flex;
   align-items: center;
@@ -129,18 +142,18 @@ hr {
   display: block;
 }
 
-#power-title {
+.title {
   font-size: 18px;
   font-weight: 600;
   line-height: 1.2;
 }
 
-#power-detail {
+.detail {
   font-size: 11px;
   color: var(--muted);
 }
 
-#power-bar {
+.bar {
   margin-top: 10px;
   height: 6px;
   border-radius: 3px;
@@ -148,7 +161,7 @@ hr {
   overflow: hidden;
 }
 
-#power-fill {
+.fill {
   height: 100%;
   border-radius: 3px;
   background: var(--tone);

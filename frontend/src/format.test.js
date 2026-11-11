@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { describePower, formatDuration } from "./format.js";
+import { describeMemory, describePower, formatDuration } from "./format.js";
 
 test("formatDuration", () => {
   assert.equal(formatDuration(11520), "3 h 12 min");
@@ -36,4 +36,23 @@ test("other states", () => {
   assert.equal(describePower({ present: true, percentage: 16, status: "discharging", secondsLeft: 600 }).low, false);
   assert.equal(describePower({ present: true, percentage: 5, status: "charging", secondsLeft: 600 }).low, false);
   assert.equal(describePower({ present: true, percentage: 99.6, status: "charging", secondsLeft: 0 }).percent, 100);
+});
+
+const GiB = 2 ** 30;
+
+test("memory (mockup values)", () => {
+  const view = describeMemory({ totalBytes: 15.6 * GiB, usedBytes: 6.1 * GiB, swapUsedBytes: 0 });
+  assert.deepEqual(view, { title: "6.1 GiB", detail: "of 15.6 GiB used · 39 %", percent: 39, high: false });
+});
+
+test("memory nearly full, with swap", () => {
+  const view = describeMemory({ totalBytes: 15.6 * GiB, usedBytes: 14.2 * GiB, swapUsedBytes: 1.1 * GiB });
+  assert.deepEqual(view, { title: "14.2 GiB", detail: "of 15.6 GiB used · 91 % · swap 1.1 GiB", percent: 91, high: true });
+});
+
+test("memory threshold and unknown state", () => {
+  assert.equal(describeMemory({ totalBytes: 100, usedBytes: 85, swapUsedBytes: 0 }).high, true);
+  assert.equal(describeMemory({ totalBytes: 100, usedBytes: 84, swapUsedBytes: 0 }).high, false);
+  assert.equal(describeMemory({ totalBytes: 0, usedBytes: 0, swapUsedBytes: 0 }), null);
+  assert.equal(describeMemory(undefined), null);
 });

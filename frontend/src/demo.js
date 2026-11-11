@@ -1,4 +1,12 @@
-// Fixed power states for `vite dev` (see main.js): the three states of the design mockups.
+// Fixed states for `vite dev` (see main.js): the power states of the design mockups, each with a memory state.
+const GiB = 2 ** 30;
+const memory = {
+  battery: { totalBytes: 15.6 * GiB, usedBytes: 6.1 * GiB, swapUsedBytes: 0 },
+  charging: { totalBytes: 15.6 * GiB, usedBytes: 9.5 * GiB, swapUsedBytes: 0 },
+  low: { totalBytes: 15.6 * GiB, usedBytes: 8.1 * GiB, swapUsedBytes: 0 },
+  ac: { totalBytes: 15.6 * GiB, usedBytes: 14.2 * GiB, swapUsedBytes: 1.1 * GiB },
+};
+
 const demos = {
   battery: { present: true, percentage: 72, status: "discharging", secondsLeft: 11520 },
   charging: { present: true, percentage: 38, status: "charging", secondsLeft: 3900 },
@@ -9,4 +17,9 @@ const demos = {
 /** The state named by ?demo=<name> in a query string, or null. */
 export function demoState(search) {
   return demos[new URLSearchParams(search).get("demo")] ?? null;
+}
+
+/** The memory state that goes with ?demo=<name>, or null. */
+export function demoMemory(search) {
+  return memory[new URLSearchParams(search).get("demo")] ?? null;
 }

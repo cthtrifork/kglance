@@ -1,8 +1,9 @@
 import { Events } from "@wailsio/runtime";
 import { Hide, Info } from "../bindings/github.com/cthtrifork/kglance/internal/popup/service.js";
+import { State as MemoryState } from "../bindings/github.com/cthtrifork/kglance/internal/memory/service.js";
 import { State } from "../bindings/github.com/cthtrifork/kglance/internal/power/service.js";
-import { demoState } from "./demo.js";
-import { describePower } from "./format.js";
+import { demoMemory, demoState } from "./demo.js";
+import { describeMemory, describePower } from "./format.js";
 
 const $ = (id) => document.getElementById(id);
 const card = $("card");
@@ -28,10 +29,13 @@ function renderClock() {
 }
 
 let timer = null;
+let ticks = 0;
 function startClock() {
   stopClock();
+  ticks = 0;
   const tick = () => {
     renderClock();
+    if (ticks++ % 2 === 0 && !demo) refreshMemory();
     // Aim at the start of the next second so the display does not drift.
     timer = setTimeout(tick, 1000 - (Date.now() % 1000) + 5);
   };
@@ -51,6 +55,26 @@ function renderPower(state) {
   $("power-detail").textContent = view.detail;
   $("power-bar").hidden = view.percent === null;
   $("power-fill").style.width = `${view.percent ?? 0}%`;
+}
+
+// Memory row. There is no signal for memory, so it is read every two seconds, only while the popup is shown.
+function renderMemory(state) {
+  const view = describeMemory(state);
+  $("memory").hidden = view === null;
+  $("memory-rule").hidden = view === null;
+  if (view === null) return;
+  $("memory").dataset.level = view.high ? "high" : "normal";
+  $("memory-title").textContent = view.title;
+  $("memory-detail").textContent = view.detail;
+  $("memory-fill").style.width = `${view.percent}%`;
+}
+
+async function refreshMemory() {
+  try {
+    renderMemory(await MemoryState());
+  } catch {
+    // The row keeps its last value; the next tick tries again.
+  }
 }
 
 // How the popup runs, and the shortcut text, which may have been rebound meanwhile.
@@ -78,7 +102,9 @@ if (!demo) {
 renderClock();
 if (demo) {
   renderPower(demo);
+  renderMemory(demoMemory(location.search));
 } else {
   refreshInfo();
   State().then(renderPower);
+  refreshMemory();
 }

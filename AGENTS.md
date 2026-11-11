@@ -40,6 +40,7 @@ make screenshots    # popup in every demo state, light and dark, into screenshot
 | `internal/popup` | Window controller: show, hide, toggle, hide on Escape, backdrop click and focus loss |
 | `internal/shortcut` | KGlobalAccel registration and the `globalShortcutPressed` listener (godbus) |
 | `internal/power` | UPower reader and property-change subscription |
+| `internal/memory` | Memory use from `/proc/meminfo`, read by the page every two seconds while the popup is shown |
 | `frontend/` | Vanilla JS + Vite; `bindings/` is generated (committed); `dist/` is build output |
 | `build/linux/` | `.desktop` files, icons, nfpm config |
 | `.github/workflows` | `ci`, `security`, `actions-lint`, `pr-title`, `release-drafter`, `screenshots`, `renovate`, `update-branches`, `tag-release`, `release`; see [`docs/ci.md`](docs/ci.md) |

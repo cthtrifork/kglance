@@ -40,3 +40,23 @@ export function describePower(state) {
       return { kind: "battery", title, detail: "", percent, low: false };
   }
 }
+
+const GIB = 2 ** 30;
+const HIGH_MEMORY_PERCENT = 85;
+const gib = (bytes) => (bytes / GIB).toFixed(1);
+
+/**
+ * What the memory row shows for a state from the Go side ({totalBytes, usedBytes, swapUsedBytes}), or null
+ * when the state is unknown (nothing is shown then). high is true at HIGH_MEMORY_PERCENT or more.
+ */
+export function describeMemory(state) {
+  if (!state?.totalBytes) return null;
+  const percent = Math.max(0, Math.min(100, Math.round((state.usedBytes / state.totalBytes) * 100)));
+  const swap = state.swapUsedBytes > 0 ? ` · swap ${gib(state.swapUsedBytes)} GiB` : "";
+  return {
+    title: `${gib(state.usedBytes)} GiB`,
+    detail: `of ${gib(state.totalBytes)} GiB used · ${percent} %${swap}`,
+    percent,
+    high: percent >= HIGH_MEMORY_PERCENT,
+  };
+}

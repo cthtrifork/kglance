@@ -1,12 +1,12 @@
 # kglance
 
-KGlance is a tiny popup for KDE Plasma. Press a shortcut, it appears. Click somewhere else, or hit Escape, and it vanishes like it was never there.
+KGlance is a tiny popup/widget for KDE Plasma. Press a shortcut, it appears. Click somewhere else, or hit Escape, and it vanishes like it was never there.
 
 It shows the time, the date and the power status: battery percentage, charging state and time left, or "On AC" on a machine without a battery. Battery changes show up live, and nothing ticks while the popup is hidden.
 
 Inspired by [Lusan-sapkota/KGlance](https://github.com/Lusan-sapkota/KGlance), and much simpler: one Go binary, no world clock, no calendar, no notification history.
 
-**Status:** early. No release is published yet (the first one is a draft), and the popup has only been tested through unit tests and CI, not on every desktop setup. Bug reports from a real Fedora KDE session are very welcome.
+![screenshot of the widget](https://github.com/cthtrifork/kglance/blob/bot/update-screenshots/screenshots/popup-battery-light.png)
 
 ## Requirements
 
@@ -19,12 +19,12 @@ Fedora 44 with KDE Plasma 6 on Wayland is the only supported platform.
 
 ## Install
 
-Each [release](https://github.com/cthtrifork/kglance/releases) will have two files plus `SHA256SUMS` and an SBOM:
+Each [release](https://github.com/cthtrifork/kglance/releases) has two files plus `SHA256SUMS` and an SBOM:
 
-- `kglance-<version>-1.x86_64.rpm`: recommended. `sudo dnf install ./kglance-*.rpm` pulls in GTK4, WebKitGTK 6 and gtk4-layer-shell, and adds the launcher entry and an autostart entry (`kglance --background`, so the shortcut works after login).
+- `kglance-<version>-1.x86_64.rpm` (for example `kglance-0.0.1-1.x86_64.rpm`): recommended. `sudo dnf install ./kglance-*.rpm` pulls in GTK4, WebKitGTK 6 and gtk4-layer-shell, and adds the launcher entry and an autostart entry (`kglance --background`, so the shortcut works after login).
 - `kglance_linux_amd64`: the bare binary. Install `gtk4`, `webkitgtk6.0`, `libsoup3` and `gtk4-layer-shell` yourself.
 
-Until the first release, build it yourself: `make rpm` (see below), or take the binary and rpm from the `build (Fedora 44)` job's artifact on any CI run.
+To build it yourself instead, run `make rpm` (see below).
 
 Both files carry signed build-provenance attestations; verify one with `gh attestation verify <file> --repo cthtrifork/kglance`.
 

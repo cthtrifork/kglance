@@ -17,7 +17,7 @@ make frontend       # frontend -> frontend/dist (embedded by the binary); needed
 make frontend-wasm  # same as `make frontend`, for a CPU without AVX2 (Vite 8's native bundler crashes there): Rolldown's WebAssembly build on Node 26, directly in the dev container or in its image via podman
 make build          # release binary, CGO-free (BACKEND=cgo for Wails' cgo backend)
 make rpm            # the Fedora package (needs the wails3 CLI)
-make screenshots    # popup in every demo state, light and dark, into screenshots/ (needs Playwright's Chromium; CI renders them too)
+make screenshots    # popup in every demo state (light; dark for one example) into screenshots/ (needs Playwright's Chromium; CI renders them too)
 ```
 
 ## Rules that are easy to get wrong

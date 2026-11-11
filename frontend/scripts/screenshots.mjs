@@ -1,4 +1,4 @@
-// Renders the popup in every demo state, light and dark, into the directory given as the first argument
+// Renders the popup in every demo state in light, and in one state in dark, into the directory given as the first argument
 // (default ../screenshots). It starts the Vite dev server itself, so the demo states (?demo=..., dev only)
 // are available, and fixes the clock so the pictures do not change from run to run.
 //
@@ -10,7 +10,8 @@ import { createServer } from "vite";
 
 const out = resolve(process.argv[2] ?? "../screenshots");
 const states = ["battery", "charging", "low", "ac"];
-const schemes = ["light", "dark"];
+// Every state in light; dark only for one example (charging, which also shows the staged OS update pill).
+const darkStates = ["charging"];
 // The time of the design mockups.
 const now = new Date("2026-11-10T23:50:47+01:00");
 
@@ -26,7 +27,7 @@ const backdrop = "html { background: linear-gradient(160deg, #2b3a52, #4a3f5f) !
 const browser = await chromium.launch();
 let failed = false;
 try {
-  for (const colorScheme of schemes) {
+  for (const colorScheme of ["light", "dark"]) {
     const context = await browser.newContext({
       viewport: { width: 340, height: 400 },
       deviceScaleFactor: 2,
@@ -34,7 +35,7 @@ try {
       locale: "en-GB",
       timezoneId: "Europe/Copenhagen",
     });
-    for (const state of states) {
+    for (const state of colorScheme === "dark" ? darkStates : states) {
       const page = await context.newPage();
       const errors = [];
       page.on("pageerror", (error) => errors.push(error.message));

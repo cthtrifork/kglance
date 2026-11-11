@@ -54,6 +54,28 @@ jobs:
       - name: Lint and check formatting (frontend)
         run: make lint-frontend
 
+      - id: wails3
+        run: echo "version=$(go list -m -f '{{.Version}}' github.com/wailsapp/wails/v3)" >> "$GITHUB_OUTPUT"
+
+      # The wails3 CLI takes a while to compile, so keep the built binary. The key is the Wails version
+      # (the CLI follows go.mod) and the Go version it was built with.
+      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ${{ runner.temp }}/bin
+          key: wails3-${{ steps.go.outputs.go-version }}-${{ steps.wails3.outputs.version }}
+
+      # frontend/bindings is generated from the Go services and committed. Regenerate it with the CLI
+      # version that matches go.mod and fail if the committed copy differs (run `make bindings`).
+      - name: Check Wails bindings are up to date
+        run: |
+          [ -x "$RUNNER_TEMP/bin/wails3" ] || GOBIN="$RUNNER_TEMP/bin" make wails3-install
+          PATH="$RUNNER_TEMP/bin:$PATH" make bindings
+          if [ -n "$(git status --porcelain -- frontend/bindings)" ]; then
+            git status --short -- frontend/bindings
+            git diff -- frontend/bindings | head -80
+            echo "::error::frontend/bindings is stale: run 'make bindings' and commit the result"; exit 1
+          fi
+
       - name: Check formatting
         run: |
           unformatted="$(gofmt -l .)"

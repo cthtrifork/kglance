@@ -4,9 +4,18 @@
     <meta charset="utf-8" />
     <title>KGlance</title>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="stylesheet" href="/src/style.css" />
   </head>
   <body>
-    <main id="app">KGlance</main>
+    <!-- The backdrop is the whole (transparent) window. With layer-shell it covers the screen, and a click on it, outside the card, closes the popup. -->
+    <div id="backdrop">
+      <main id="card">
+        <footer>
+          <span><span id="shortcut">Meta+Alt+G</span> to toggle</span>
+          <span>Esc to close</span>
+        </footer>
+      </main>
+    </div>
     <script type="module" src="/src/main.js"></script>
   </body>
 </html>

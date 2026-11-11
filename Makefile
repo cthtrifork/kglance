@@ -30,8 +30,9 @@ help: ## List the targets
 
 ## Development -------------------------------------------------------------
 
-test: ## Run the Go tests (set RACE=-race for the race detector; needs gcc)
+test: ## Run the Go tests (set RACE=-race for the race detector; needs gcc) and the frontend's
 	CGO_ENABLED=$(if $(RACE),1,0) go test $(RACE) -tags purego -count=1 ./...
+	cd frontend && npm test
 
 fmt: ## Format the Go code
 	gofmt -w .

@@ -14,6 +14,7 @@ import (
 
 	"github.com/cthtrifork/kglance/internal/layershell"
 	"github.com/cthtrifork/kglance/internal/popup"
+	"github.com/cthtrifork/kglance/internal/power"
 	"github.com/cthtrifork/kglance/internal/shortcut"
 	"github.com/cthtrifork/kglance/internal/version"
 	"github.com/wailsapp/wails/v3/pkg/application"
@@ -53,11 +54,19 @@ func main() {
 	keys := shortcut.New(toggle)
 	svc := popup.NewService(keys.Text)
 
-	app := application.New(application.Options{
+	// The power monitor sends its changes to the page as events; it is built first because the service
+	// that returns its state is part of the app's options.
+	var app *application.App
+	battery := power.NewMonitor(func(s power.State) { app.Event.Emit(power.EventChanged, s) })
+
+	app = application.New(application.Options{
 		Name:        "KGlance",
 		Description: "A glance at the time, the date and the battery (" + version.Version + ")",
-		Services:    []application.Service{application.NewService(svc)},
-		Assets:      application.AssetOptions{Handler: application.AssetFileServerFS(frontend)},
+		Services: []application.Service{
+			application.NewService(svc),
+			application.NewService(power.NewService(battery.State)),
+		},
+		Assets: application.AssetOptions{Handler: application.AssetFileServerFS(frontend)},
 		Linux: application.LinuxOptions{
 			// GTK reports the application id as the Wayland app_id, which KDE matches to the .desktop file.
 			ApplicationID: appID,
@@ -85,7 +94,7 @@ func main() {
 		p.ShowWhenReady()
 	}
 
-	// Register the global shortcut once the app is running. Without a session bus or KGlobalAccel (not
+	// Register the global shortcut and start the power monitor once the app is running. Without a session bus or KGlobalAccel (not
 	// KDE) the app still works through `kglance --toggle`.
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
@@ -93,6 +102,11 @@ func main() {
 		go func() {
 			if err := keys.Start(ctx); err != nil {
 				log.Printf("global shortcut unavailable (use `kglance --toggle`): %v", err)
+			}
+		}()
+		go func() {
+			if err := battery.Start(ctx); err != nil {
+				log.Printf("power status unavailable, showing \"On AC\": %v", err)
 			}
 		}()
 	})

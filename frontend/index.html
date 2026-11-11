@@ -10,6 +10,18 @@
     <!-- The backdrop is the whole (transparent) window. With layer-shell it covers the screen, and a click on it, outside the card, closes the popup. -->
     <div id="backdrop">
       <main id="card">
+        <section class="clock">
+          <div class="time"><span id="time">--:--</span><span id="seconds"></span></div>
+          <div id="date"></div>
+        </section>
+        <hr />
+        <section id="power" data-kind="ac">
+          <div class="power-text">
+            <div id="power-title"></div>
+            <div id="power-detail"></div>
+          </div>
+          <div id="power-bar" hidden><div id="power-fill"></div></div>
+        </section>
         <footer>
           <span id="shortcut-hint"><span id="shortcut">Meta+Alt+G</span> to toggle</span>
           <span>Esc to close</span>

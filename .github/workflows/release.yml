@@ -132,7 +132,7 @@ jobs:
     # The binary loads GTK4 and WebKitGTK at run time, so the container decides which libraries the
     # rpm is checked against, and Fedora 44 is the only supported platform.
     runs-on: ubuntu-latest
-    container: registry.fedoraproject.org/fedora:44@sha256:17c99e30075386f9385685a22ad1924e2c22faee5863272c0379c81b80b9d258
+    container: registry.fedoraproject.org/fedora:44@sha256:f08613fffc95f5c85c019b2f4ac9e9fb9bb84b9cfd59275671b84169567b157e
     timeout-minutes: 25
     steps:
       - name: Install tools and the runtime libraries

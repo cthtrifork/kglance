@@ -1,0 +1,51 @@
+# nfpm does not expand ${...} in contents paths, so package-linux.sh stages the binary at bin/kglance.
+# Packaged by `wails3 tool package` (which wraps nfpm). Fedora only, so rpm is the only format built.
+
+name: kglance
+arch: amd64
+platform: linux
+version: ${PKG_VERSION}
+release: "1"
+section: utils
+priority: optional
+maintainer: KGlance maintainers <noreply@users.noreply.github.com>
+description: |-
+  A tiny popup for KDE Plasma: press a shortcut and see the time, the date
+  and the power status. Escape or a click outside closes it.
+vendor: cthtrifork
+homepage: https://github.com/cthtrifork/kglance
+license: MIT
+
+contents:
+  - src: ./bin/kglance
+    dst: /usr/bin/kglance
+    file_info:
+      mode: 0755
+  - src: ./build/linux/io.github.cthtrifork.kglance.desktop
+    dst: /usr/share/applications/io.github.cthtrifork.kglance.desktop
+  # Starts the app at login, for every user; a user switches it off in System Settings -> Autostart.
+  - src: ./build/linux/kglance-autostart.desktop
+    dst: /etc/xdg/autostart/io.github.cthtrifork.kglance.desktop
+    type: config|noreplace
+  - src: ./build/linux/io.github.cthtrifork.kglance.svg
+    dst: /usr/share/icons/hicolor/scalable/apps/io.github.cthtrifork.kglance.svg
+  - src: ./LICENSE
+    dst: /usr/share/licenses/kglance/LICENSE
+  - src: ./README.md
+    dst: /usr/share/doc/kglance/README.md
+
+# The app loads these at run time (Wails' purego backend and internal/layershell), so they are
+# requirements even though nothing is linked.
+depends:
+  - gtk4
+  - webkitgtk6.0
+  - libsoup3
+  - gtk4-layer-shell
+# The battery needs UPower; the shortcut needs KDE's kglobalacceld, which is part of Plasma.
+recommends:
+  - upower
+
+rpm:
+  compression: zstd
+  signature:
+    key_file: ${PKG_SIGNING_KEY_FILE}

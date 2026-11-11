@@ -12,12 +12,12 @@ Inspired by [Lusan-sapkota/KGlance](https://github.com/Lusan-sapkota/KGlance), a
 
 Each [release](https://github.com/cthtrifork/kglance/releases) has two files:
 
-- `kglance-<version>.x86_64.rpm`: recommended. `sudo dnf install ./kglance-*.rpm` pulls in GTK4, WebKitGTK 6 and gtk4-layer-shell and adds the launcher and autostart entries.
+- `kglance-<version>-1.x86_64.rpm`: recommended. `sudo dnf install ./kglance-*.rpm` pulls in GTK4, WebKitGTK 6 and gtk4-layer-shell and adds the launcher entry and an autostart entry (`kglance --background`, so the shortcut works after login).
 - `kglance_linux_amd64`: the bare binary. Install `gtk4`, `webkitgtk6.0` and `gtk4-layer-shell` yourself.
 
 ## Use
 
-The default shortcut is `Meta+Alt+G`. Change it in System Settings → Keyboard → Shortcuts → KGlance. `kglance --toggle` toggles the running popup from a terminal or a custom shortcut on another desktop.
+The default shortcut is `Meta+Alt+G`. Change it in System Settings → Keyboard → Shortcuts → KGlance. `kglance --toggle` toggles the running popup from a terminal or a custom shortcut on another desktop. Starting `kglance` from the menu shows the popup; `kglance --background` starts it hidden.
 
 ## Develop
 

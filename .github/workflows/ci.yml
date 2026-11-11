@@ -54,6 +54,28 @@ jobs:
       - name: Lint and check formatting (frontend)
         run: make lint-frontend
 
+      - id: wails3
+        run: echo "version=$(go list -m -f '{{.Version}}' github.com/wailsapp/wails/v3)" >> "$GITHUB_OUTPUT"
+
+      # The wails3 CLI takes a while to compile, so keep the built binary. The key is the Wails version
+      # (the CLI follows go.mod) and the Go version it was built with.
+      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ${{ runner.temp }}/bin
+          key: wails3-${{ steps.go.outputs.go-version }}-${{ steps.wails3.outputs.version }}
+
+      # frontend/bindings is generated from the Go services and committed. Regenerate it with the CLI
+      # version that matches go.mod and fail if the committed copy differs (run `make bindings`).
+      - name: Check Wails bindings are up to date
+        run: |
+          [ -x "$RUNNER_TEMP/bin/wails3" ] || GOBIN="$RUNNER_TEMP/bin" make wails3-install
+          PATH="$RUNNER_TEMP/bin:$PATH" make bindings
+          if [ -n "$(git status --porcelain -- frontend/bindings)" ]; then
+            git status --short -- frontend/bindings
+            git diff -- frontend/bindings | head -80
+            echo "::error::frontend/bindings is stale: run 'make bindings' and commit the result"; exit 1
+          fi
+
       - name: Check formatting
         run: |
           unformatted="$(gofmt -l .)"
@@ -100,6 +122,12 @@ jobs:
           cache: true
           cache-dependency-path: go.sum
 
+      # The frontend's unit tests use node's own runner and need no npm packages.
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .tool-versions
+          package-manager-cache: false
+
       # No frontend build: frontend/dist/.gitkeep satisfies go:embed, and nothing here reads the bundle.
       # The build is CGO-free (purego), so no GTK headers are needed. The race detector needs cgo, hence gcc
       # (preinstalled on the runner).
@@ -121,7 +149,7 @@ jobs:
     steps:
       - name: Install tools and the runtime libraries
         run: |
-          dnf install -y --setopt=install_weak_deps=False make git gcc tar gzip \
+          dnf install -y --setopt=install_weak_deps=False make git gcc tar gzip desktop-file-utils \
             gtk4 webkitgtk6.0 libsoup3 gtk4-layer-shell
           cat /etc/os-release | grep PRETTY_NAME
 
@@ -157,10 +185,30 @@ jobs:
             if ldconfig -p | grep -q "$lib"; then echo "ok   $lib"; else echo "::error::missing $lib"; exit 1; fi
           done
 
-      - name: Keep the binary for reviewers
+      - name: Validate the desktop files
+        run: desktop-file-validate build/linux/*.desktop
+
+      # The rpm is what users install. Installing it here proves the dependency names exist on Fedora 44.
+      - name: Package the rpm
+        run: |
+          GOBIN="$RUNNER_TEMP/bin" make wails3-install
+          PATH="$RUNNER_TEMP/bin:$PATH" scripts/package-linux.sh dist/kglance "ci-${GITHUB_SHA::7}" dist
+          ls -l dist
+
+      - name: The rpm installs on Fedora 44
+        run: |
+          dnf install -y dist/*.rpm
+          rpm -qi kglance
+          kglance --version
+          test -f /etc/xdg/autostart/io.github.cthtrifork.kglance.desktop
+          test -f /usr/share/applications/io.github.cthtrifork.kglance.desktop
+
+      - name: Keep the binary and the rpm for reviewers
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
-          name: kglance-linux-amd64
-          path: dist/kglance
+          name: kglance-fedora-44
+          path: |
+            dist/kglance
+            dist/*.rpm
           if-no-files-found: error
           retention-days: 7

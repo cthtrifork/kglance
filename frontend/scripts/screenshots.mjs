@@ -9,7 +9,8 @@ import { chromium } from "playwright-core";
 import { createServer } from "vite";
 
 const out = resolve(process.argv[2] ?? "../screenshots");
-const states = ["battery", "charging", "low", "ac"];
+// name -> query string; "update" is the battery state with the OS update marker.
+const states = { battery: "demo=battery", charging: "demo=charging", low: "demo=low", ac: "demo=ac", update: "demo=battery&update=staged" };
 const schemes = ["light", "dark"];
 // The time of the design mockups.
 const now = new Date("2026-11-10T23:50:47+01:00");
@@ -34,12 +35,12 @@ try {
       locale: "en-GB",
       timezoneId: "Europe/Copenhagen",
     });
-    for (const state of states) {
+    for (const [state, query] of Object.entries(states)) {
       const page = await context.newPage();
       const errors = [];
       page.on("pageerror", (error) => errors.push(error.message));
       await page.clock.setFixedTime(now);
-      await page.goto(`${base}?demo=${state}`);
+      await page.goto(`${base}?${query}`);
       await page.waitForFunction(() => document.getElementById("power-title")?.textContent !== "");
       await page.addStyleTag({ content: backdrop });
       const file = `${out}/popup-${state}-${colorScheme}.png`;

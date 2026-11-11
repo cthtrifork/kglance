@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { describeMemory, describePower, formatDuration } from "./format.js";
+import { describeMemory, describePower, describeUpdate, formatDuration } from "./format.js";
 
 test("formatDuration", () => {
   assert.equal(formatDuration(11520), "3 h 12 min");
@@ -55,4 +55,11 @@ test("memory threshold and unknown state", () => {
   assert.equal(describeMemory({ totalBytes: 100, usedBytes: 84, swapUsedBytes: 0 }).high, false);
   assert.equal(describeMemory({ totalBytes: 0, usedBytes: 0, swapUsedBytes: 0 }), null);
   assert.equal(describeMemory(undefined), null);
+});
+
+test("OS update marker", () => {
+  assert.equal(describeUpdate(null), null);
+  assert.equal(describeUpdate({ staged: false, version: "" }), null);
+  assert.equal(describeUpdate({ staged: true, version: "latest.20261111" }).text, "OS update staged · latest.20261111");
+  assert.equal(describeUpdate({ staged: true, version: "" }).text, "OS update staged");
 });

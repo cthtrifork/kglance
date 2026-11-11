@@ -23,3 +23,8 @@ export function demoState(search) {
 export function demoMemory(search) {
   return memory[new URLSearchParams(search).get("demo")] ?? null;
 }
+
+/** The OS update state that goes with ?update=staged, or null. */
+export function demoUpdate(search) {
+  return new URLSearchParams(search).get("update") === "staged" ? { staged: true, version: "latest.20261111" } : null;
+}

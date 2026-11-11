@@ -14,6 +14,7 @@ import (
 
 	"github.com/cthtrifork/kglance/internal/layershell"
 	"github.com/cthtrifork/kglance/internal/memory"
+	"github.com/cthtrifork/kglance/internal/osupdate"
 	"github.com/cthtrifork/kglance/internal/popup"
 	"github.com/cthtrifork/kglance/internal/power"
 	"github.com/cthtrifork/kglance/internal/shortcut"
@@ -72,6 +73,7 @@ func main() {
 			application.NewService(svc),
 			application.NewService(power.NewService(battery.State)),
 			application.NewService(memory.NewService(memory.Read)),
+			application.NewService(osupdate.NewService(osupdate.Read)),
 		},
 		Assets: application.AssetOptions{Handler: application.AssetFileServerFS(frontend)},
 		Linux: application.LinuxOptions{

@@ -55,7 +55,7 @@ Screenshots are never committed. Every pull request that touches the frontend ge
 make help       # every target, grouped
 make check      # gofmt, tidy, vet, tests (Go and frontend)
 make lint       # golangci-lint, Biome, knip
-make dev        # Vite dev server with hot reload; add ?demo=charging (battery|charging|low|ac) to the URL
+make dev        # Vite dev server with hot reload; add ?demo=charging (battery|charging|low|ac) to the URL, and &update=staged for the OS update marker
 make build      # the single binary, CGO-free; needs no GTK headers
 make rpm        # the Fedora package (needs the wails3 CLI: make wails3-install)
 make screenshots

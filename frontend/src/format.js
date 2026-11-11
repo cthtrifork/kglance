@@ -41,6 +41,16 @@ export function describePower(state) {
   }
 }
 
+/**
+ * What the OS update marker shows for a state from the Go side ({staged, version}), or null when no update
+ * is staged (nothing is shown then).
+ */
+export function describeUpdate(state) {
+  if (!state?.staged) return null;
+  const version = state.version ? ` · ${state.version}` : "";
+  return { text: `OS update staged${version}`, title: "A new OS image is staged. Reboot to apply it." };
+}
+
 const GIB = 2 ** 30;
 const HIGH_MEMORY_PERCENT = 85;
 const gib = (bytes) => (bytes / GIB).toFixed(1);

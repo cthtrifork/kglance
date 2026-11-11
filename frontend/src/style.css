@@ -168,6 +168,35 @@ hr {
   transition: width 0.3s ease;
 }
 
+/* OS update marker: a small pill above the footer, only while a new image is staged for the next reboot. */
+#update {
+  margin-top: 12px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 2px 8px 2px 6px;
+  border-radius: 999px;
+  font-size: 10px;
+  color: var(--muted);
+  background: color-mix(in srgb, var(--accent) 14%, transparent);
+}
+
+#update[hidden] {
+  display: none;
+}
+
+#update i {
+  flex: none;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--accent);
+}
+
+#update:not([hidden]) + footer {
+  margin-top: 8px;
+}
+
 footer {
   margin-top: 14px;
   display: flex;

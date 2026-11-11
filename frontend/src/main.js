@@ -1,9 +1,10 @@
 import { Events } from "@wailsio/runtime";
-import { Hide, Info } from "../bindings/github.com/cthtrifork/kglance/internal/popup/service.js";
 import { State as MemoryState } from "../bindings/github.com/cthtrifork/kglance/internal/memory/service.js";
+import { State as UpdateState } from "../bindings/github.com/cthtrifork/kglance/internal/osupdate/service.js";
+import { Hide, Info } from "../bindings/github.com/cthtrifork/kglance/internal/popup/service.js";
 import { State } from "../bindings/github.com/cthtrifork/kglance/internal/power/service.js";
-import { demoMemory, demoState } from "./demo.js";
-import { describeMemory, describePower } from "./format.js";
+import { demoMemory, demoState, demoUpdate } from "./demo.js";
+import { describeMemory, describePower, describeUpdate } from "./format.js";
 
 const $ = (id) => document.getElementById(id);
 const card = $("card");
@@ -77,6 +78,24 @@ async function refreshMemory() {
   }
 }
 
+// OS update marker. The host already knows whether an image is staged (rpm-ostree reads local state, nothing is
+// fetched), so it is asked each time the popup is shown.
+function renderUpdate(state) {
+  const view = describeUpdate(state);
+  $("update").hidden = view === null;
+  if (view === null) return;
+  $("update-text").textContent = view.text;
+  $("update").title = view.title;
+}
+
+async function refreshUpdate() {
+  try {
+    renderUpdate(await UpdateState());
+  } catch {
+    // No marker is better than a wrong one; the next time the popup is shown tries again.
+  }
+}
+
 // How the popup runs, and the shortcut text, which may have been rebound meanwhile.
 async function refreshInfo() {
   const info = await Info();
@@ -94,6 +113,7 @@ if (!demo) {
   Events.On("popup:shown", () => {
     startClock();
     refreshInfo();
+    refreshUpdate();
   });
   Events.On("popup:hidden", stopClock);
   Events.On("power:changed", (event) => renderPower(event.data));
@@ -103,8 +123,10 @@ renderClock();
 if (demo) {
   renderPower(demo);
   renderMemory(demoMemory(location.search));
+  renderUpdate(demoUpdate(location.search));
 } else {
   refreshInfo();
   State().then(renderPower);
   refreshMemory();
+  refreshUpdate();
 }

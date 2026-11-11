@@ -168,44 +168,66 @@ hr {
   transition: width 0.3s ease;
 }
 
-/* OS update pill: always there. Blue when a new image is staged for the next reboot, grey when none is or the state is unknown. */
+/* OS update pill: always there. A new staged image stands out (blue, with a second line telling what to do);
+   "none" and "unknown" stay quiet. A long version wraps; it is never cut off. */
 #update {
   --dot: var(--muted);
-  max-width: 100%;
-  margin-top: 12px;
   display: flex;
   width: fit-content;
+  max-width: 100%;
   align-items: flex-start;
   gap: 6px;
-  padding: 3px 8px 3px 6px;
+  margin-top: 12px;
+  padding: 3px 9px 3px 7px;
   border-radius: 10px;
   font-size: 10px;
-  line-height: 1.3;
+  line-height: 1.35;
   color: var(--muted);
   background: var(--track);
 }
 
 #update[data-kind="staged"] {
   --dot: var(--accent);
-  background: color-mix(in srgb, var(--accent) 14%, transparent);
+  color: var(--text);
+  background: color-mix(in srgb, var(--accent) 16%, transparent);
 }
 
 #update i {
   flex: none;
-  margin-top: 4px;
   width: 6px;
   height: 6px;
+  margin-top: 4px;
   border-radius: 50%;
   background: var(--dot);
 }
 
-/* A long version wraps to a second line; it is never cut off. */
-#update span {
+#update > span {
   min-width: 0;
   overflow-wrap: anywhere;
 }
 
+#update-text {
+  display: block;
+}
+
+#update[data-kind="staged"] #update-text {
+  font-weight: 600;
+}
+
+#update-detail {
+  display: block;
+  color: var(--muted);
+}
+
+#update-detail:empty {
+  display: none;
+}
+
 #update + footer {
+  margin-top: 8px;
+}
+
+footer {
   margin-top: 8px;
 }
 

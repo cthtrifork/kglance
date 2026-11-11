@@ -54,23 +54,33 @@ export function formatAge(seconds) {
 /**
  * What the OS update pill shows for a state from the Go side ({known, staged, version, timestamp}); now is
  * the current time in Unix seconds. kind is "staged" (a new image waits for a reboot), "none" (nothing
- * staged; only the running image's age is shown) or "unknown" (rpm-ostree could not be asked).
+ * staged) or "unknown" (rpm-ostree could not be asked). text is the first line; detail is a second line,
+ * only for a staged update ("" otherwise). The version is shown only for a staged update: the running image's is
+ * not news.
  */
 export function describeUpdate(state, now) {
   if (!state?.known) {
-    return { kind: "unknown", text: "OS update: unknown", title: "The OS update state could not be read." };
+    return { kind: "unknown", text: "OS update status unavailable", detail: "", title: "rpm-ostree could not be read." };
   }
   const age = state.timestamp ? formatAge(now - state.timestamp) : "";
-  const parts = [state.staged ? "OS update: staged" : "OS update: none"];
-  // The version is only worth a line when it is a new one; the running image's is not news.
-  if (state.staged && state.version) parts.push(state.version);
-  if (age) parts.push(age);
+  if (state.staged) {
+    const built = age === "now" ? "Built just now" : age ? `Built ${age} ago` : "";
+    return {
+      kind: "staged",
+      text: state.version ? `OS update staged · ${state.version}` : "OS update staged",
+      detail: [built, "reboot to apply"]
+        .filter(Boolean)
+        .join(" · ")
+        .replace(/^./, (c) => c.toUpperCase()),
+      title: "A new OS image is staged and applies on the next reboot.",
+    };
+  }
+  const old = age && age !== "now" ? ` · image ${age} old` : "";
   return {
-    kind: state.staged ? "staged" : "none",
-    text: parts.join(" · "),
-    title: state.staged
-      ? "A new OS image is staged (the age is when it was built). Reboot to apply it."
-      : "No OS update is staged. The age is when the running image was built.",
+    kind: "none",
+    text: `No OS update staged${old}`,
+    detail: "",
+    title: "Nothing is staged. The age is when the running image was built.",
   };
 }
 

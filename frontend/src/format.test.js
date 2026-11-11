@@ -70,11 +70,17 @@ test("formatAge", () => {
 test("OS update pill", () => {
   const now = 1000000;
   assert.equal(describeUpdate(null, now).kind, "unknown");
-  assert.equal(describeUpdate({ known: false }, now).text, "OS update: unknown");
+  assert.equal(describeUpdate({ known: false }, now).text, "OS update status unavailable");
   const staged = { known: true, staged: true, version: "latest.20261111", timestamp: now - 7200 };
-  assert.equal(describeUpdate(staged, now).text, "OS update: staged · latest.20261111 · 2h");
-  assert.equal(describeUpdate(staged, now).kind, "staged");
+  assert.deepEqual(
+    { ...describeUpdate(staged, now), title: "" },
+    { kind: "staged", text: "OS update staged · latest.20261111", detail: "Built 2h ago · reboot to apply", title: "" },
+  );
+  assert.equal(describeUpdate({ ...staged, timestamp: now - 5 }, now).detail, "Built just now · reboot to apply");
+  assert.equal(describeUpdate({ ...staged, version: "", timestamp: 0 }, now).text, "OS update staged");
+  assert.equal(describeUpdate({ ...staged, version: "", timestamp: 0 }, now).detail, "Reboot to apply");
   const none = { known: true, staged: false, version: "latest.20261110", timestamp: now - 86400 * 3 };
-  assert.equal(describeUpdate(none, now).text, "OS update: none · 3d");
-  assert.equal(describeUpdate({ known: true, staged: false, version: "", timestamp: 0 }, now).text, "OS update: none");
+  assert.equal(describeUpdate(none, now).text, "No OS update staged · image 3d old");
+  assert.equal(describeUpdate(none, now).detail, "");
+  assert.equal(describeUpdate({ known: true, staged: false, version: "", timestamp: 0 }, now).text, "No OS update staged");
 });

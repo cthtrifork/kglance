@@ -85,6 +85,7 @@ function renderUpdate(state) {
   $("update").dataset.kind = view.kind;
   $("update").title = view.title;
   $("update-text").textContent = view.text;
+  $("update-detail").textContent = view.detail;
 }
 
 async function refreshUpdate() {

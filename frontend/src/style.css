@@ -8,6 +8,7 @@
   --track: #e3e5e7;
   --accent: #3daee9;
   --good: #27ae60;
+  --caution: #f67400;
   --warn: #da4453;
   --shadow: 0 12px 32px rgb(0 0 0 / 0.22), 0 2px 6px rgb(0 0 0 / 0.12);
   --border: #d5d8db;
@@ -90,7 +91,7 @@ hr {
   margin: 14px 0;
 }
 
-/* Power row: the colour says the state (blue on battery, green charging or full, red when low). */
+/* Power row: the colour says the state (blue on battery, orange under half, green charging or full, red when low). */
 #power {
   --tone: var(--accent);
 }
@@ -98,6 +99,10 @@ hr {
 #power[data-kind="charging"],
 #power[data-kind="full"] {
   --tone: var(--good);
+}
+
+#power[data-kind="battery"][data-level="under-half"]:not([data-low="true"]) {
+  --tone: var(--caution);
 }
 
 #power[data-low="true"] {
@@ -161,7 +166,14 @@ hr {
 }
 
 #power[data-level="low"] .cell {
-  width: 1.5px;
+  width: 2.5px;
+}
+
+/* The bolt sits on the cell in the same colour, so a halo in the card colour cuts it out of the fill. */
+.bolt-halo {
+  stroke: var(--card);
+  stroke-width: 3;
+  stroke-linecap: butt;
 }
 
 .title {

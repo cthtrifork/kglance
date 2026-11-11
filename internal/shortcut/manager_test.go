@@ -47,8 +47,8 @@ func TestRegisterUsesDefaultWhenNothingSaved(t *testing.T) {
 	}
 	want := []call{
 		{"doRegister", nil, 0},
+		{"setShortcut", []int32{0x18000047}, flagSetPresent | flagIsDefault}, // the default first
 		{"setShortcut", []int32{0x18000047}, flagSetPresent},
-		{"setShortcut", []int32{0x18000047}, flagSetPresent | flagIsDefault},
 	}
 	if len(f.calls) != len(want) {
 		t.Fatalf("calls = %+v", f.calls)
@@ -131,5 +131,29 @@ func TestIsAccelRestarted(t *testing.T) {
 	}
 	if isAccelRestarted(owner("org.other", "", ":1.1")) {
 		t.Error("another service is not a restart")
+	}
+}
+
+// daemonAccel models what a freshly registered action does in KGlobalAccel: setting the active keys loads
+// a saved binding and, with none saved, falls back to the default keys, if one has been set by then.
+type daemonAccel struct{ def []int32 }
+
+func (d *daemonAccel) doRegister([]string) error { return nil }
+
+func (d *daemonAccel) setShortcut(_ []string, keys []int32, flags uint32) ([]int32, error) {
+	if flags&flagIsDefault != 0 {
+		d.def = keys
+		return keys, nil
+	}
+	return d.def, nil
+}
+
+func TestRegisterBindsTheDefaultOnAFreshAction(t *testing.T) {
+	active, err := register(&daemonAccel{}, 0x18000047)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !slices.Equal(active, []int32{0x18000047}) {
+		t.Fatalf("a fresh action ended up with %#x, want the default Meta+Alt+G", active)
 	}
 }

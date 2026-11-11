@@ -37,3 +37,7 @@ The UI is a clock, a date and a battery row. No framework. Vite bundles `@wailsi
 ## 7. Releases are a binary and an rpm
 
 No Copr, no rpm repository, no tarball, no deb. The raw binary needs GTK4, WebKitGTK 6 and gtk4-layer-shell installed; the rpm pulls them in, so the README recommends it.
+
+## 8. The battery icon shows three bars, with the colour doing the warning
+
+A 24 px icon cannot show five levels apart, and the bar under the icon already shows the exact percentage. So the icon lights three bars (3 from 67%, 2 from 34%, 1 from 5%), and the colour says how urgent it is: blue, orange under 50%, red at 15% or less (LOW_PERCENT), green while charging or full. Over half and under half can therefore light the same bars in different colours. The charging bolt has a halo in the card colour so it stays visible on lit bars. The thresholds live in `frontend/src/format.js`.

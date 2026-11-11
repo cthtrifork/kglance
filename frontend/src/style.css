@@ -101,7 +101,7 @@ hr {
   --tone: var(--good);
 }
 
-#power[data-kind="battery"][data-level="under-half"]:not([data-low="true"]) {
+#power[data-caution="true"] {
   --tone: var(--caution);
 }
 
@@ -147,26 +147,18 @@ hr {
   display: block;
 }
 
-/* The cell inside the battery icon shows the level (the drawing is 13 wide when full). */
+/* The three bars inside the battery icon; the ones the level has not reached are dimmed. */
 .icon .cell {
   fill: var(--tone);
   stroke: none;
+  opacity: 0.22;
 }
 
-#power[data-level="over-half"] .cell {
-  width: 10px;
-}
-
-#power[data-level="half"] .cell {
-  width: 6.5px;
-}
-
-#power[data-level="under-half"] .cell {
-  width: 3.5px;
-}
-
-#power[data-level="low"] .cell {
-  width: 2.5px;
+#power[data-bars="1"] .cell-1,
+#power[data-bars="2"] .cell-1,
+#power[data-bars="2"] .cell-2,
+#power[data-bars="3"] .cell {
+  opacity: 1;
 }
 
 /* The bolt sits on the cell in the same colour, so a halo in the card colour cuts it out of the fill. */

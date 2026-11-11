@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { batteryLevel, describeMemory, describePower, describeUpdate, formatAge, formatDuration } from "./format.js";
+import { batteryBars, describeMemory, describePower, describeUpdate, formatAge, formatDuration } from "./format.js";
 
 test("formatDuration", () => {
   assert.equal(formatDuration(11520), "3 h 12 min");
@@ -20,7 +20,8 @@ test("on battery (mockup 1)", () => {
     detail: "On battery · 3 h 12 min left",
     percent: 72,
     low: false,
-    level: "over-half",
+    caution: false,
+    bars: 3,
   });
 });
 
@@ -32,13 +33,22 @@ test("charging (mockup 2)", () => {
     detail: "Charging · 1 h 05 min until full",
     percent: 38,
     low: false,
-    level: "under-half",
+    caution: false,
+    bars: 2,
   });
 });
 
 test("desktop without a battery (mockup 3)", () => {
   const view = describePower({ present: false, percentage: 0, status: "unknown", secondsLeft: 0 });
-  assert.deepEqual(view, { kind: "ac", title: "On AC", detail: "No battery detected", percent: null, low: false, level: "none" });
+  assert.deepEqual(view, {
+    kind: "ac",
+    title: "On AC",
+    detail: "No battery detected",
+    percent: null,
+    low: false,
+    caution: false,
+    bars: 0,
+  });
   assert.equal(describePower(undefined).kind, "ac");
 });
 
@@ -52,22 +62,29 @@ test("other states", () => {
   assert.equal(describePower({ present: true, percentage: 99.6, status: "charging", secondsLeft: 0 }).percent, 100);
 });
 
-test("battery level bands", () => {
-  const bands = [
-    [100, "full"],
-    [80, "full"],
-    [79, "over-half"],
-    [60, "over-half"],
-    [59, "half"],
-    [40, "half"],
-    [39, "under-half"],
-    [16, "under-half"],
-    [15, "low"],
-    [0, "low"],
+test("battery bars and colour", () => {
+  const bars = [
+    [100, 3],
+    [67, 3],
+    [66, 2],
+    [34, 2],
+    [33, 1],
+    [5, 1],
+    [4, 0],
+    [0, 0],
   ];
-  for (const [percent, level] of bands) assert.equal(batteryLevel(percent), level, `${percent}%`);
-  assert.equal(describePower({ present: true, percentage: 90, status: "charging", secondsLeft: 0 }).level, "full");
-  assert.equal(describePower({ present: true, percentage: 50, status: "pending-discharge", secondsLeft: 0 }).level, "half");
+  for (const [percent, want] of bars) assert.equal(batteryBars(percent), want, `${percent}%`);
+  const on = (percentage, status) => describePower({ present: true, percentage, status, secondsLeft: 0 });
+  // Over half and under half can light the same two bars; only the colour differs.
+  assert.deepEqual([on(60, "discharging").bars, on(60, "discharging").caution], [2, false]);
+  assert.deepEqual([on(45, "discharging").bars, on(45, "discharging").caution], [2, true]);
+  assert.equal(on(49, "discharging").caution, true);
+  assert.equal(on(50, "discharging").caution, false);
+  assert.equal(on(16, "discharging").caution, true);
+  assert.equal(on(15, "discharging").caution, false); // low is red, not orange
+  assert.equal(on(30, "charging").caution, false); // charging stays green
+  assert.equal(on(90, "charging").bars, 3);
+  assert.equal(on(50, "pending-discharge").bars, 2);
 });
 
 const GiB = 2 ** 30;

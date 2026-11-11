@@ -5,10 +5,6 @@ const memory = {
   charging: { totalBytes: 15.6 * GiB, usedBytes: 9.5 * GiB, swapUsedBytes: 0 },
   low: { totalBytes: 15.6 * GiB, usedBytes: 8.1 * GiB, swapUsedBytes: 0 },
   ac: { totalBytes: 15.6 * GiB, usedBytes: 14.2 * GiB, swapUsedBytes: 1.1 * GiB },
-  full: { totalBytes: 15.6 * GiB, usedBytes: 6.1 * GiB, swapUsedBytes: 0 },
-  "over-half": { totalBytes: 15.6 * GiB, usedBytes: 6.1 * GiB, swapUsedBytes: 0 },
-  half: { totalBytes: 15.6 * GiB, usedBytes: 6.1 * GiB, swapUsedBytes: 0 },
-  "under-half": { totalBytes: 15.6 * GiB, usedBytes: 6.1 * GiB, swapUsedBytes: 0 },
 };
 
 const demos = {
@@ -16,10 +12,6 @@ const demos = {
   charging: { present: true, percentage: 38, status: "charging", secondsLeft: 3900 },
   low: { present: true, percentage: 9, status: "discharging", secondsLeft: 1500 },
   ac: { present: false, percentage: 0, status: "unknown", secondsLeft: 0 },
-  full: { present: true, percentage: 94, status: "discharging", secondsLeft: 16200 },
-  "over-half": { present: true, percentage: 68, status: "discharging", secondsLeft: 11000 },
-  half: { present: true, percentage: 50, status: "discharging", secondsLeft: 8400 },
-  "under-half": { present: true, percentage: 27, status: "discharging", secondsLeft: 4500 },
 };
 
 /** The state named by ?demo=<name> in a query string, or null. */

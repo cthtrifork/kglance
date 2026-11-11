@@ -46,5 +46,6 @@ npm-debug.log*
 .claude/settings.local.json
 .claude/scratch/
 
-# Screenshots and scratch output
+# Screenshots and scratch output (rendered in CI by screenshots.yml, never committed)
 /shots/
+/screenshots/

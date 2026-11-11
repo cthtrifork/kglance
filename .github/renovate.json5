@@ -1,4 +1,5 @@
-// Renovate config, read by the Renovate GitHub App (no self-hosted workflow). actions-lint.yml validates it.
+// Renovate config. Renovate runs self-hosted from .github/workflows/renovate.yml, which loads this file as its
+// global config, so a pull request that changes it is checked by a dry run (see docs/ci.md).
 {
   $schema: "https://docs.renovatebot.com/renovate-schema.json",
   extends: [
@@ -20,6 +21,8 @@
   minimumReleaseAge: "2 days",
   internalChecksFilter: "strict",
   postUpdateOptions: ["gomodTidy"],
+  // Commits go through GitHub's API as the GitHub App, so they are verified (signed) without a key.
+  platformCommit: "enabled",
 
   dependencyDashboard: true,
   dependencyDashboardTitle: "Dependency Dashboard",
@@ -94,13 +97,6 @@
       // Digest updates of the pinned fedora:44 image still come through.
       matchDepNames: ["registry.fedoraproject.org/fedora"],
       matchUpdateTypes: ["major", "minor"],
-      enabled: false,
-    },
-    {
-      // Vite 8 ships a native bundler that needs a newer CPU baseline than the development VM has.
-      // Bumping Vite is a decision, not a routine update.
-      matchPackageNames: ["vite"],
-      matchUpdateTypes: ["major"],
       enabled: false,
     },
   ],

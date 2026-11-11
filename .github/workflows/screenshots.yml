@@ -1,0 +1,239 @@
+name: Screenshots
+
+# The screenshots are never committed to main: screenshots/ is gitignored and rendered here, in the
+# frontend's demo mode (`?demo=battery|charging|low|ac`, dev server only) with the clock fixed.
+#
+#   pull_request  Render the screenshots, upload each image as its own unzipped artifact
+#                 (`archive: false`) and embed them in one sticky PR comment that is updated on
+#                 every push. Nothing is pushed anywhere. Fork PRs (read-only token) get the
+#                 artifacts on the run page but no comment.
+#   push to main  Render everything, force-push the images as one commit on top of main to
+#                 bot/update-screenshots and keep one DRAFT PR open from it ("Screenshots
+#                 preview"). The PR exists only so the current images can be browsed in its
+#                 "Files changed" tab. It is never merged: it is a draft (GitHub refuses to merge
+#                 a draft), the CI job `no-screenshots` fails on it, and the workflow turns it back
+#                 into a draft if someone marks it ready. Close it and the next run opens a new one.
+#
+# Nothing ever lands on main, so there is no loop and no binary merge conflict.
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    paths:
+      - frontend/**
+      - .github/workflows/screenshots.yml
+  push:
+    branches: [main]
+    paths:
+      - frontend/**
+      - .github/workflows/screenshots.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: screenshots-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  screenshots:
+    name: screenshots
+    if: github.actor != 'dependabot[bot]' && github.actor != 'renovate[bot]'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read # main-only pushes use the App token
+      pull-requests: write # the sticky comment (PRs)
+    steps:
+      # Push with the GitHub App's token, not GITHUB_TOKEN: a push made with GITHUB_TOKEN starts no
+      # workflows, so CI would never report on the bot commit. The App is the one Renovate uses.
+      - name: Get a GitHub App token
+        id: app-token
+        # Without the App (variable not set yet) the main run still renders, but pushes nothing.
+        if: github.event_name != 'pull_request' && vars.RENOVATE_APP_CLIENT_ID != ''
+        uses: actions/create-github-app-token@64ab729a6294000f5aa4a4bc0b73d1f32bc45510 # v3.3.0
+        with:
+          client-id: ${{ vars.RENOVATE_APP_CLIENT_ID }}
+          private-key: ${{ secrets.RENOVATE_APP_PRIVATE_KEY }}
+          permission-contents: write # push the commit
+          permission-pull-requests: write # open and update the preview PR
+
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          token: ${{ steps.app-token.outputs.token || github.token }}
+          persist-credentials: ${{ github.event_name != 'pull_request' }} # only the main run pushes # zizmor: ignore[artipacked]
+
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .tool-versions
+          package-manager-cache: false
+
+      # The page asks for Noto Sans; installing it keeps the pictures the same from run to run.
+      - name: Install fonts
+        run: |
+          sudo apt-get -o Acquire::Languages=none update -qq
+          sudo apt-get install -y --no-install-recommends fonts-noto-core
+
+      # The browser version follows the playwright-core version in frontend/package-lock.json.
+      - name: Install Chromium
+        working-directory: frontend
+        run: |
+          npm ci --ignore-scripts --no-audit --no-fund
+          npx playwright-core install --with-deps chromium
+
+      - name: Generate screenshots
+        run: make screenshots
+
+      - name: Upload popup-battery-light
+        id: shot-popup-battery-light
+        if: github.event_name == 'pull_request'
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          path: screenshots/popup-battery-light.png
+          archive: false # one file per artifact, so it can be embedded; the file name is the artifact name
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Upload popup-battery-dark
+        id: shot-popup-battery-dark
+        if: github.event_name == 'pull_request'
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          path: screenshots/popup-battery-dark.png
+          archive: false # one file per artifact, so it can be embedded; the file name is the artifact name
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Upload popup-charging-light
+        id: shot-popup-charging-light
+        if: github.event_name == 'pull_request'
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          path: screenshots/popup-charging-light.png
+          archive: false # one file per artifact, so it can be embedded; the file name is the artifact name
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Upload popup-charging-dark
+        id: shot-popup-charging-dark
+        if: github.event_name == 'pull_request'
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          path: screenshots/popup-charging-dark.png
+          archive: false # one file per artifact, so it can be embedded; the file name is the artifact name
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Upload popup-low-light
+        id: shot-popup-low-light
+        if: github.event_name == 'pull_request'
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          path: screenshots/popup-low-light.png
+          archive: false # one file per artifact, so it can be embedded; the file name is the artifact name
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Upload popup-low-dark
+        id: shot-popup-low-dark
+        if: github.event_name == 'pull_request'
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          path: screenshots/popup-low-dark.png
+          archive: false # one file per artifact, so it can be embedded; the file name is the artifact name
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Upload popup-ac-light
+        id: shot-popup-ac-light
+        if: github.event_name == 'pull_request'
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          path: screenshots/popup-ac-light.png
+          archive: false # one file per artifact, so it can be embedded; the file name is the artifact name
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Upload popup-ac-dark
+        id: shot-popup-ac-dark
+        if: github.event_name == 'pull_request'
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          path: screenshots/popup-ac-dark.png
+          archive: false # one file per artifact, so it can be embedded; the file name is the artifact name
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Build the screenshots comment
+        id: comment-body
+        if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
+        env:
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          STEPS: ${{ toJSON(steps) }}
+        run: |
+          # Every PNG rendered here needs an `Upload` step above; fail loudly when a screenshot was added.
+          want="$(find screenshots -name '*.png' | wc -l)"
+          have="$(jq '[to_entries[] | select(.key | startswith("shot-"))] | length' <<<"$STEPS")"
+          if [ "$want" != "$have" ]; then
+            echo "::error::screenshots/ has $want images but screenshots.yml uploads $have: add or remove an 'Upload <name>' step."
+            exit 1
+          fi
+
+          body="$(mktemp)"
+          {
+            echo "### Screenshots"
+            echo
+            echo "Demo-mode renders of the popup at ${HEAD_SHA::7}, clock fixed at 2026-11-10 23:50:47. Not committed: screenshots never live in the repository, the draft PR \`bot/update-screenshots\` shows the ones from \`main\`. Images are run artifacts: you must be logged in to see them, and they expire after 14 days."
+            echo
+            jq -r 'to_entries[] | select(.key | startswith("shot-")) | "\(.key[5:])\t\(.value.outputs["artifact-url"])"' <<<"$STEPS" |
+              while IFS=$'\t' read -r name url; do
+                # A heading, then the bare artifact URL as its own paragraph, with no HTML wrapper,
+                # which GitHub renders inline.
+                echo "#### ${name}"
+                echo
+                echo "${url}"
+                echo
+              done
+          } > "$body"
+
+          echo "path=$body" >> "$GITHUB_OUTPUT"
+          echo "Screenshots are in the PR comment and in the run's artifacts." >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Show screenshots in a PR comment
+        if: steps.comment-body.outcome == 'success'
+        uses: marocchino/sticky-pull-request-comment@5770ad5eb8f42dd2c4f34da00c94c5381e49af88 # v3.0.5
+        with:
+          header: screenshots-preview
+          path: ${{ steps.comment-body.outputs.path }}
+
+      - name: Summarise (fork pull request)
+        if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name != github.repository
+        run: |
+          echo "Rendered \`screenshots/\`. This is a fork PR (read-only token), so there is no PR comment: the images are in this run's artifacts." >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Update the screenshots preview PR
+        if: github.event_name != 'pull_request' && steps.app-token.outcome == 'success'
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+          BRANCH: bot/update-screenshots
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git checkout -B "$BRANCH"
+          git add -f screenshots # the folder is gitignored
+          if git fetch --quiet origin "$BRANCH" 2>/dev/null && git diff --cached --quiet "origin/$BRANCH" -- screenshots; then
+            echo "The screenshots preview is up to date." | tee -a "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+          git commit -m "Screenshots preview (never merge)"
+          # Always rebuilt from the current main, so the branch cannot conflict with it.
+          git push --force origin "$BRANCH"
+          body="Preview of the screenshots rendered in demo mode on \`main\` (${GITHUB_SHA::7}). **Never merge this PR**: screenshots do not live in the repository. Open *Files changed* to see the images; the branch is rebuilt on every push to \`main\`."
+          pr="$(gh pr list --head "$BRANCH" --state open --json number --jq '.[].number')"
+          if [ -z "$pr" ]; then
+            gh pr create --draft --base main --head "$BRANCH" --title "Screenshots preview (do not merge)" --body "$body"
+          else
+            gh pr edit "$pr" --body "$body"
+            gh pr ready "$pr" --undo || true # a draft cannot be merged
+          fi
+          echo "Screenshots preview PR for \`${BRANCH}\` is up to date." | tee -a "$GITHUB_STEP_SUMMARY"

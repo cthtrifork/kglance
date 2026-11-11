@@ -89,6 +89,12 @@ test("battery bars and colour", () => {
   }
   assert.deepEqual([on(95, "fully-charged").bars, on(95, "fully-charged").tone], [3, "charge"]);
   assert.equal(on(10, "fully-charged").tone, "charge");
+  // From 95% a charging battery counts as fully charged.
+  assert.deepEqual(
+    [on(95, "charging").kind, on(95, "charging").detail, on(94, "charging").kind, on(94, "charging").detail],
+    ["full", "Fully charged", "charging", "Charging"],
+  );
+  assert.equal(on(97, "discharging").detail, "On battery");
   assert.equal(on(90, "empty").tone, "warn");
 });
 

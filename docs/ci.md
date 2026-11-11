@@ -40,7 +40,7 @@ Self-hosted ([renovatebot/github-action](https://github.com/renovatebot/github-a
 
 ## Screenshots
 
-`screenshots.yml` renders the popup in every demo state (battery, charging, low, no battery), light and dark, with Playwright against the Vite dev server. The page only accepts `?demo=...` in the dev server, and the clock is fixed, so the images are stable. `make screenshots` does the same locally.
+`screenshots.yml` renders the popup in every demo state (battery, charging, low, no battery, OS update staged, OS update unreadable), light and dark, with Playwright against the Vite dev server. The page only accepts `?demo=...` in the dev server, and the clock is fixed, so the images are stable. `make screenshots` does the same locally.
 
 - **Pull request:** each image is uploaded as its own unzipped artifact and all are embedded in one sticky PR comment that is updated on every push. Viewers must be logged in, and the images expire after 14 days. Fork PRs get the artifacts but no comment.
 - **Push to `main`:** the images are force-pushed as one commit on top of `main` to `bot/update-screenshots`, and one draft PR "Screenshots preview (do not merge)" is kept open from it, so the current pictures can be browsed in its Files changed tab. It is never merged; `no-screenshots` in `ci.yml` fails on it (add that check to the required checks).

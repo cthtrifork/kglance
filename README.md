@@ -50,7 +50,7 @@ Run `kglance` from a terminal; it logs why a part is unavailable.
 
 ## Screenshots
 
-Screenshots are never committed. Every pull request that touches the frontend gets a comment with the popup rendered in each demo state (battery, charging, low battery, no battery; light and dark), and the draft pull request [Screenshots preview](https://github.com/cthtrifork/kglance/pulls?q=is%3Apr+Screenshots+preview) shows the ones from `main` in its Files changed tab.
+Screenshots are never committed. Every pull request that touches the frontend gets a comment with the popup rendered in each demo state (battery, charging, low battery, no battery, OS update staged, OS update unreadable; light and dark), and the draft pull request [Screenshots preview](https://github.com/cthtrifork/kglance/pulls?q=is%3Apr+Screenshots+preview) shows the ones from `main` in its Files changed tab.
 
 ## Develop
 

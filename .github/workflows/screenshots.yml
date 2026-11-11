@@ -164,6 +164,46 @@ jobs:
           if-no-files-found: error
           retention-days: 14
 
+      - name: Upload popup-update-light
+        id: shot-popup-update-light
+        if: github.event_name == 'pull_request'
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          path: screenshots/popup-update-light.png
+          archive: false # one file per artifact, so it can be embedded; the file name is the artifact name
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Upload popup-update-dark
+        id: shot-popup-update-dark
+        if: github.event_name == 'pull_request'
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          path: screenshots/popup-update-dark.png
+          archive: false # one file per artifact, so it can be embedded; the file name is the artifact name
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Upload popup-unknown-light
+        id: shot-popup-unknown-light
+        if: github.event_name == 'pull_request'
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          path: screenshots/popup-unknown-light.png
+          archive: false # one file per artifact, so it can be embedded; the file name is the artifact name
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Upload popup-unknown-dark
+        id: shot-popup-unknown-dark
+        if: github.event_name == 'pull_request'
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          path: screenshots/popup-unknown-dark.png
+          archive: false # one file per artifact, so it can be embedded; the file name is the artifact name
+          if-no-files-found: error
+          retention-days: 14
+
       - name: Build the screenshots comment
         id: comment-body
         if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository

@@ -22,9 +22,9 @@ Wayland clients cannot place or centre their own windows. The popup is a full-sc
 
 The library is `gtk4-layer-shell` (GTK4), not `gtk-layer-shell` (GTK3). It must be loaded before GTK, so `internal/layershell` opens it from `init()`.
 
-## 4. Global shortcut through KGlobalAccel over D-Bus
+## 4. Global shortcut through KGlobalAccel and a desktop action
 
-The app registers a "Toggle KGlance" action under the component `io.github.cthtrifork.kglance.desktop` with default `Meta+Alt+G`, then listens for `globalShortcutPressed`. The user's own binding from System Settings wins over the default and survives restarts. Wails' xdg-desktop-portal shortcut backend was not used because KGlobalAccel gives a stable action id and a visible entry under the app's name.
+The shortcut is a desktop action, `[Desktop Action toggle]` in `build/linux/io.github.cthtrifork.kglance.desktop`, with `Exec=/usr/bin/kglance --toggle` and default `Meta+Alt+G` (`X-KDE-Shortcuts`). KGlobalAccel treats a component named after an installed `.desktop` file as a launcher (`KServiceActionComponent`): pressing the key runs the desktop action of that name and emits no `globalShortcutPressed` to the app, so an action that exists only in the app's own D-Bus registration never fires. `--toggle` reaches the running instance through the single-instance hand-off (decision 5), or starts the app. The app still registers the same action over D-Bus, only to read back the key that is active for the footer. The user's own binding from System Settings wins over the default and survives restarts. Wails' xdg-desktop-portal shortcut backend was not used because KGlobalAccel gives a stable action id and a visible entry under the app's name.
 
 ## 5. `--toggle` through Wails' single-instance support
 

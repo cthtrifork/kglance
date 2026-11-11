@@ -12,3 +12,13 @@ Keywords=clock;time;date;battery;power;popup;
 StartupNotify=false
 # Matches the GTK application id the app sets (main.go), which is the Wayland app_id; the file name must be the same id.
 StartupWMClass=io.github.cthtrifork.kglance
+# KGlobalAccel treats a component named after an installed .desktop file as a launcher: when its
+# shortcut is pressed it runs the desktop action of the same name and sends no D-Bus signal to the
+# app. So the global shortcut is this action, which hands `--toggle` to the running instance (or
+# starts the app). X-KDE-Shortcuts is the default key; the user's own binding in System Settings wins.
+Actions=toggle;
+
+[Desktop Action toggle]
+Name=Toggle KGlance
+Exec=/usr/bin/kglance --toggle
+X-KDE-Shortcuts=Meta+Alt+G

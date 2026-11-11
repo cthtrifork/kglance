@@ -30,5 +30,5 @@ A dry run (`release.yml` dispatched on a branch) builds everything but publishes
 ## Repository settings (once, by the owner)
 
 - Branch rules on `main`: require a pull request, and the checks `lint`, `test`, `build (Fedora 44)` and `check title`; squash merge only.
-- Install the Renovate GitHub App on the repository (config: `.github/renovate.json5`).
+- Create the Renovate GitHub App and add the `RENOVATE_APP_CLIENT_ID` variable and `RENOVATE_APP_PRIVATE_KEY` secret (see [ci](ci.md)); also require `no-screenshots`.
 - Allow GitHub Actions to create releases and attestations (the defaults are enough).

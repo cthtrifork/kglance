@@ -41,4 +41,4 @@ make screenshots    # popup in every demo state, light and dark, into screenshot
 | `internal/power` | UPower reader and property-change subscription |
 | `frontend/` | Vanilla JS + Vite; `bindings/` is generated (committed); `dist/` is build output |
 | `build/linux/` | `.desktop` files, icons, nfpm config |
-| `.github/workflows` | `ci`, `security`, `actions-lint`, `pr-title`, `release-drafter`, `tag-release`, `release` |
+| `.github/workflows` | `ci`, `security`, `actions-lint`, `pr-title`, `release-drafter`, `screenshots`, `renovate`, `update-branches`, `tag-release`, `release`; see [`docs/ci.md`](docs/ci.md) |

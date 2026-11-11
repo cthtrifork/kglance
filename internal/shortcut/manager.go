@@ -1,9 +1,12 @@
-// Package shortcut registers KGlance's global shortcut with KDE's KGlobalAccel over D-Bus and calls a
-// function when it is pressed.
+// Package shortcut registers KGlance's global shortcut with KDE's KGlobalAccel over D-Bus and reports
+// which keys are bound to it.
 //
-// The action shows up in System Settings → Shortcuts under the component's friendly name, with the
-// icon of the .desktop file of the same id (build/linux). A binding the user sets there is kept by
-// KGlobalAccel and wins over the default on later starts.
+// The component is named after the app's .desktop file (build/linux), so KGlobalAccel treats it as a
+// launcher: pressing the key runs the desktop action of the same name (`kglance --toggle`) and sends no
+// signal to the app. Registering here is what makes KGlobalAccel create that component and load the
+// action, and it reads back the key that is active, for the popup's footer. The action shows up in
+// System Settings → Shortcuts under the component's friendly name. A binding the user sets there is
+// kept by KGlobalAccel and wins over the default on later starts.
 package shortcut
 
 import (
@@ -33,9 +36,6 @@ const (
 	accelName      = "org.kde.kglobalaccel"
 	accelPath      = dbus.ObjectPath("/kglobalaccel")
 	accelInterface = "org.kde.KGlobalAccel"
-
-	componentInterface = "org.kde.kglobalaccel.Component"
-	pressedMember      = "globalShortcutPressed"
 )
 
 // KGlobalAccel's setShortcut flags (KGlobalAccel::SetShortcutFlag).
@@ -76,20 +76,19 @@ func register(a accel, def int32) ([]int32, error) {
 	return active, nil
 }
 
-// Manager owns the registration and the listener.
+// Manager owns the registration.
 type Manager struct {
-	onPressed func()
-	def       int32
-	text      atomic.Pointer[string]
+	def  int32
+	text atomic.Pointer[string]
 }
 
-// New returns a manager that calls onPressed whenever the shortcut is pressed.
-func New(onPressed func()) *Manager {
+// New returns a manager for the shortcut, showing the default key until it has read the active one.
+func New() *Manager {
 	def, err := ParseKeys(DefaultShortcut)
 	if err != nil {
 		panic(err) // a constant; keys_test.go covers it
 	}
-	m := &Manager{onPressed: onPressed, def: def}
+	m := &Manager{def: def}
 	m.setText(DefaultShortcut)
 	return m
 }
@@ -108,22 +107,13 @@ func (m *Manager) setActive(keys []int32) {
 	m.setText(FormatKeys(keys[0]))
 }
 
-// Start connects to the session bus, registers the action and listens until ctx ends. It returns once
-// the registration has been tried; an error means the shortcut is not available (no session bus, no
+// Start connects to the session bus and registers the action, and registers it again whenever
+// KGlobalAccel restarts, until ctx ends. It returns once the first registration has been tried; an error means the shortcut is not available (no session bus, no
 // KGlobalAccel), and the app still works through `kglance --toggle`.
 func (m *Manager) Start(ctx context.Context) error {
 	conn, err := dbus.ConnectSessionBus()
 	if err != nil {
 		return fmt.Errorf("session bus: %w", err)
-	}
-	// Subscribe before registering so no press is missed. The sender is not matched: signals come from
-	// the component's own object, and they are told apart by their arguments.
-	if err := conn.AddMatchSignal(
-		dbus.WithMatchInterface(componentInterface),
-		dbus.WithMatchMember(pressedMember),
-	); err != nil {
-		_ = conn.Close()
-		return fmt.Errorf("match signal: %w", err)
 	}
 	// KGlobalAccel restarts with the Plasma session; register again when it comes back.
 	if err := conn.AddMatchSignal(
@@ -151,10 +141,7 @@ func (m *Manager) Start(ctx context.Context) error {
 				if !ok {
 					return
 				}
-				switch {
-				case IsPressed(sig):
-					m.onPressed()
-				case isAccelRestarted(sig):
+				if isAccelRestarted(sig) {
 					if err := m.registerWith(client); err != nil {
 						log.Printf("shortcut: re-register after KGlobalAccel restart: %v", err)
 					}
@@ -172,16 +159,6 @@ func (m *Manager) registerWith(a accel) error {
 	}
 	m.setActive(active)
 	return nil
-}
-
-// IsPressed reports whether sig is KGlobalAccel's "shortcut pressed" signal for our action.
-func IsPressed(sig *dbus.Signal) bool {
-	if sig == nil || sig.Name != componentInterface+"."+pressedMember || len(sig.Body) < 2 {
-		return false
-	}
-	component, ok1 := sig.Body[0].(string)
-	action, ok2 := sig.Body[1].(string)
-	return ok1 && ok2 && component == Component && action == Action
 }
 
 // isAccelRestarted reports whether sig says KGlobalAccel got a new owner on the bus.

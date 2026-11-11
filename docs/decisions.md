@@ -32,7 +32,7 @@ A second `kglance --toggle` hands its arguments to the running instance and exit
 
 ## 6. Vanilla frontend
 
-The UI is a clock, a date and a battery row. No framework. Vite bundles `@wailsio/runtime`. Vite is pinned to 7: Vite 8's native bundler crashes on CPUs without AVX2.
+The UI is a clock, a date and a battery row. No framework. Vite bundles `@wailsio/runtime`. The toolchain follows trivy-dashboard-wail3: Go 1.27, Node 26 and Vite 8. (Vite 8's native bundler crashes on CPUs without AVX2, so the frontend cannot be built on every development VM; CI is the reference build.)
 
 ## 7. Releases are a binary and an rpm
 

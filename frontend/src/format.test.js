@@ -76,7 +76,7 @@ test("battery bars and colour", () => {
     assert.deepEqual([on(45, status).bars, on(45, status).tone], [2, "caution"], status);
     assert.deepEqual([on(10, status).bars, on(10, status).tone], [1, "warn"], status);
   }
-  // Charging is blue at every level but red below 30%; the bars still show the level. Fully charged is green.
+  // Charging is blue at every level but red below 30%; the bars still show the level. Fully charged is blue too.
   for (const [percent, bars, tone] of [
     [95, 3, "charge"],
     [70, 3, "charge"],
@@ -87,8 +87,8 @@ test("battery bars and colour", () => {
   ]) {
     assert.deepEqual([on(percent, "charging").bars, on(percent, "charging").tone], [bars, tone], `charging ${percent}%`);
   }
-  assert.deepEqual([on(95, "fully-charged").bars, on(95, "fully-charged").tone], [3, "good"]);
-  assert.equal(on(10, "fully-charged").tone, "good");
+  assert.deepEqual([on(95, "fully-charged").bars, on(95, "fully-charged").tone], [3, "charge"]);
+  assert.equal(on(10, "fully-charged").tone, "charge");
   assert.equal(on(90, "empty").tone, "warn");
 });
 

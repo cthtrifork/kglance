@@ -31,7 +31,7 @@ export function batteryTone(percent) {
  * kind is "ac" (no battery), "battery", "charging" or "full"; percent is null when there is no bar.
  * bars (0 to 3) is how many bars the battery icon lights: 3 from 70%, 2 from 30%, else 1 (0 without a battery).
  * tone is the colour. Running on the battery it follows the bars: "good" (green, 3), "caution" (orange, 2) or "warn" (red, 1).
- * Charging and no battery are "charge" (blue), but a charging battery below 30% is "warn" (red); fully charged is "good".
+ * Charging, fully charged and no battery are "charge" (blue), but a charging battery below 30% is "warn" (red).
  */
 export function describePower(state) {
   if (!state?.present) {
@@ -56,7 +56,7 @@ export function describePower(state) {
     case "discharging":
       return { kind: "battery", title, detail: left ? `On battery · ${left} left` : "On battery", percent, tone, bars };
     case "fully-charged":
-      return { kind: "full", title, detail: "Fully charged", percent, tone: "good", bars };
+      return { kind: "full", title, detail: "Fully charged", percent, tone: "charge", bars };
     case "empty":
       return { kind: "battery", title, detail: "Empty", percent, tone: "warn", bars };
     case "pending-charge":

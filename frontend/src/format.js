@@ -75,7 +75,7 @@ export function describeUpdate(state, now) {
       title: "A new OS image is staged and applies on the next reboot.",
     };
   }
-  const old = age && age !== "now" ? ` · image ${age} old` : "";
+  const old = age === "now" ? " · built just now" : age ? ` · built ${age} ago` : "";
   return {
     kind: "none",
     text: `No OS update staged${old}`,

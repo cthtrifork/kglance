@@ -80,7 +80,7 @@ test("OS update pill", () => {
   assert.equal(describeUpdate({ ...staged, version: "", timestamp: 0 }, now).text, "OS update staged");
   assert.equal(describeUpdate({ ...staged, version: "", timestamp: 0 }, now).detail, "Reboot to apply");
   const none = { known: true, staged: false, version: "latest.20261110", timestamp: now - 86400 * 3 };
-  assert.equal(describeUpdate(none, now).text, "No OS update staged · image 3d old");
+  assert.equal(describeUpdate(none, now).text, "No OS update staged · built 3d ago");
   assert.equal(describeUpdate(none, now).detail, "");
   assert.equal(describeUpdate({ known: true, staged: false, version: "", timestamp: 0 }, now).text, "No OS update staged");
 });

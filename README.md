@@ -4,7 +4,7 @@ KGlance is a tiny popup/widget for KDE Plasma. Press a shortcut, it appears. Cli
 
 It shows the time, the date, the power status and memory use. Power is the battery percentage, charging state and time left, or "On AC" on a machine without a battery; memory is used of total, with swap when it is in use, and turns red when nearly full. Battery changes show up live, memory is read every two seconds, and nothing ticks while the popup is hidden.
 
-A small pill above the footer shows the OS update state. When a new image is staged for the next reboot it is highlighted and says so with a second line: `OS update staged · latest.20261111` and `Built 2h ago · reboot to apply`. Otherwise it is quiet: `No OS update staged · image 3d old` (the age of the running image), or `OS update status unavailable` when it cannot be read. This pill is made for one kind of system, an image-based Fedora (bootc/ostree), see below.
+A small pill above the footer shows the OS update state. When a new image is staged for the next reboot it is highlighted and says so with a second line: `OS update staged · latest.20261111` and `Built 2h ago · reboot to apply`. Otherwise it is quiet: `No OS update staged · built 3d ago` (when the running image was built), or `OS update status unavailable` when it cannot be read. This pill is made for one kind of system, an image-based Fedora (bootc/ostree), see below.
 
 Inspired by [Lusan-sapkota/KGlance](https://github.com/Lusan-sapkota/KGlance), and much simpler: one Go binary, no world clock, no calendar, no notification history.
 

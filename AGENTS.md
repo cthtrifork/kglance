@@ -1,6 +1,6 @@
 # AGENTS.md
 
-Start here. This file is for AI coding agents (and humans) picking up work on **KGlance**: a small popup for KDE Plasma 6 on Fedora that shows the clock, the date and the power status. A global shortcut toggles it; Escape or a click outside closes it. Go + Wails v3, vanilla HTML/CSS/JS frontend, one binary, one platform (Fedora 44, Wayland).
+Start here. This file is for AI coding agents (and humans) picking up work on **KGlance**: a small popup for KDE Plasma 6 on Fedora that shows the clock, the date, the power status and memory use, plus a small pill with the OS update state. A global shortcut toggles it; Escape or a click outside closes it. Go + Wails v3, vanilla HTML/CSS/JS frontend, one binary, one platform (Fedora 44, Wayland).
 
 Why things are the way they are: [`docs/decisions.md`](docs/decisions.md). Do not re-litigate without new facts.
 
@@ -17,7 +17,7 @@ make frontend       # frontend -> frontend/dist (embedded by the binary); needed
 make frontend-wasm  # same as `make frontend`, for a CPU without AVX2 (Vite 8's native bundler crashes there): Rolldown's WebAssembly build on Node 26, directly in the dev container or in its image via podman
 make build          # release binary, CGO-free (BACKEND=cgo for Wails' cgo backend)
 make rpm            # the Fedora package (needs the wails3 CLI)
-make screenshots    # popup in every demo state, light and dark, into screenshots/ (needs Playwright's Chromium; CI renders them too)
+make screenshots    # popup in every demo state (light; dark for one example) into screenshots/ (needs Playwright's Chromium; CI renders them too)
 ```
 
 ## Rules that are easy to get wrong
@@ -43,6 +43,7 @@ make screenshots    # popup in every demo state, light and dark, into screenshot
 | `internal/shortcut` | KGlobalAccel registration and the `globalShortcutPressed` listener (godbus) |
 | `internal/power` | UPower reader and property-change subscription |
 | `internal/memory` | Memory use from `/proc/meminfo`, read by the page every two seconds while the popup is shown |
+| `internal/osupdate` | OS update pill (staged, none or unknown): `rpm-ostree status --json` (works without root, reads only local state), asked each time the popup is shown |
 | `frontend/` | Vanilla JS + Vite; `bindings/` is generated (committed); `dist/` is build output |
 | `.devcontainer/` | Go 1.27 + Node 26 dev container, see [`docs/devcontainer.md`](docs/devcontainer.md) |
 | `build/linux/` | `.desktop` files, icons, nfpm config |

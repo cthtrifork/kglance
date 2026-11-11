@@ -168,6 +168,73 @@ hr {
   transition: width 0.3s ease;
 }
 
+/* OS update pill: always there. A new staged image stands out (blue, with a second line telling what to do);
+   "none" and "unknown" stay quiet. A long version wraps; it is never cut off. */
+#update {
+  --dot: var(--muted);
+  display: flex;
+  width: fit-content;
+  max-width: 100%;
+  align-items: flex-start;
+  gap: 6px;
+  margin-top: 12px;
+  padding: 3px 9px 3px 7px;
+  border-radius: 10px;
+  font-size: 10px;
+  line-height: 1.35;
+  color: var(--muted);
+  background: var(--track);
+}
+
+#update[data-kind="staged"] {
+  --dot: var(--accent);
+  color: var(--text);
+  background: color-mix(in srgb, var(--accent) 16%, transparent);
+}
+
+#update i {
+  flex: none;
+  width: 6px;
+  height: 6px;
+  margin-top: 4px;
+  border-radius: 50%;
+  background: var(--dot);
+}
+
+#update > span {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+#update-text {
+  display: block;
+}
+
+#update[data-kind="staged"] #update-text {
+  font-weight: 600;
+}
+
+#update-detail {
+  display: block;
+  color: var(--muted);
+}
+
+#update-detail:empty {
+  display: none;
+}
+
+#update + footer {
+  margin-top: 8px;
+}
+
+footer {
+  margin-top: 8px;
+}
+
+footer {
+  margin-top: 8px;
+}
+
 footer {
   margin-top: 14px;
   display: flex;

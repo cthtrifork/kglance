@@ -94,16 +94,6 @@ jobs:
           if-no-files-found: error
           retention-days: 14
 
-      - name: Upload popup-battery-dark
-        id: shot-popup-battery-dark
-        if: github.event_name == 'pull_request'
-        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
-        with:
-          path: screenshots/popup-battery-dark.png
-          archive: false # one file per artifact, so it can be embedded; the file name is the artifact name
-          if-no-files-found: error
-          retention-days: 14
-
       - name: Upload popup-charging-light
         id: shot-popup-charging-light
         if: github.event_name == 'pull_request'
@@ -134,32 +124,12 @@ jobs:
           if-no-files-found: error
           retention-days: 14
 
-      - name: Upload popup-low-dark
-        id: shot-popup-low-dark
-        if: github.event_name == 'pull_request'
-        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
-        with:
-          path: screenshots/popup-low-dark.png
-          archive: false # one file per artifact, so it can be embedded; the file name is the artifact name
-          if-no-files-found: error
-          retention-days: 14
-
       - name: Upload popup-ac-light
         id: shot-popup-ac-light
         if: github.event_name == 'pull_request'
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           path: screenshots/popup-ac-light.png
-          archive: false # one file per artifact, so it can be embedded; the file name is the artifact name
-          if-no-files-found: error
-          retention-days: 14
-
-      - name: Upload popup-ac-dark
-        id: shot-popup-ac-dark
-        if: github.event_name == 'pull_request'
-        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
-        with:
-          path: screenshots/popup-ac-dark.png
           archive: false # one file per artifact, so it can be embedded; the file name is the artifact name
           if-no-files-found: error
           retention-days: 14

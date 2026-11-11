@@ -41,6 +41,49 @@ export function describePower(state) {
   }
 }
 
+/** "now", "12m", "2h", "3d": how long ago; "" when the time is unknown. */
+export function formatAge(seconds) {
+  if (!Number.isFinite(seconds) || seconds <= 0) return "";
+  if (seconds < 60) return "now";
+  const minutes = Math.floor(seconds / 60);
+  if (minutes < 60) return `${minutes}m`;
+  const hours = Math.floor(minutes / 60);
+  return hours < 48 ? `${hours}h` : `${Math.floor(hours / 24)}d`;
+}
+
+/**
+ * What the OS update pill shows for a state from the Go side ({known, staged, version, timestamp}); now is
+ * the current time in Unix seconds. kind is "staged" (a new image waits for a reboot), "none" (nothing
+ * staged) or "unknown" (rpm-ostree could not be asked). text is the first line; detail is a second line,
+ * only for a staged update ("" otherwise). The version is shown only for a staged update: the running image's is
+ * not news.
+ */
+export function describeUpdate(state, now) {
+  if (!state?.known) {
+    return { kind: "unknown", text: "OS update status unavailable", detail: "", title: "rpm-ostree could not be read." };
+  }
+  const age = state.timestamp ? formatAge(now - state.timestamp) : "";
+  if (state.staged) {
+    const built = age === "now" ? "Built just now" : age ? `Built ${age} ago` : "";
+    return {
+      kind: "staged",
+      text: state.version ? `OS update staged · ${state.version}` : "OS update staged",
+      detail: [built, "reboot to apply"]
+        .filter(Boolean)
+        .join(" · ")
+        .replace(/^./, (c) => c.toUpperCase()),
+      title: "A new OS image is staged and applies on the next reboot.",
+    };
+  }
+  const old = age === "now" ? " · built just now" : age ? ` · built ${age} ago` : "";
+  return {
+    kind: "none",
+    text: `No OS update staged${old}`,
+    detail: "",
+    title: "Nothing is staged. The age is when the running image was built.",
+  };
+}
+
 const GIB = 2 ** 30;
 const HIGH_MEMORY_PERCENT = 85;
 const gib = (bytes) => (bytes / GIB).toFixed(1);

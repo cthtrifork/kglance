@@ -23,7 +23,7 @@ endif
 RACE ?=
 
 .DEFAULT_GOAL := help
-.PHONY: help fmt format lint lint-go lint-frontend tools format-frontend vet test check frontend wails3-install bindings screenshots build rpm run clean
+.PHONY: help fmt format lint lint-go lint-frontend tools format-frontend vet test check frontend frontend-wasm wails3-install bindings screenshots build rpm run clean
 
 help: ## List the targets
 	@awk -F':.*## ' '/^[a-zA-Z_-]+:.*## /{printf "  %-17s %s\n", $$1, $$2}' $(MAKEFILE_LIST)
@@ -71,6 +71,15 @@ check: ## What CI checks without a C toolchain: gofmt, tidy, vet, tests
 
 frontend: ## Build the frontend into frontend/dist (embedded by the Go binary)
 	cd frontend && npm ci --ignore-scripts --no-audit --no-fund && npm run build
+
+# Vite 8's native bundler (Rolldown) needs AVX2, which some CPUs (Intel Jasper Lake, such as the Celeron
+# N4505) lack: it dies with "Illegal instruction". Rolldown also ships a WebAssembly build; it only works
+# on Node 26, so this runs in a container. Not needed in CI or on any CPU from the last decade.
+frontend-wasm: ## Build the frontend on a CPU without AVX2: Node 26 in podman with Rolldown's WebAssembly build
+	podman run --rm -v "$(CURDIR)/frontend:/src" -w /src -e NAPI_RS_FORCE_WASI=error -e npm_config_cache=/tmp/npm \
+		mirror.gcr.io/library/node:26-trixie-slim sh -c 'npm ci --ignore-scripts --no-audit --no-fund && \
+		npm install --no-save --ignore-scripts --no-audit --no-fund "@rolldown/binding-wasm32-wasi@$$(node -p "require(\"./node_modules/rolldown/package.json\").version")" && \
+		npm run build'
 
 wails3-install: ## Install the wails3 CLI at the go.mod version into GOBIN
 	CGO_ENABLED=0 go install -tags purego github.com/wailsapp/wails/v3/cmd/wails3@$$(go list -m -f '{{.Version}}' github.com/wailsapp/wails/v3)

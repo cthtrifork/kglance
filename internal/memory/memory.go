@@ -58,9 +58,10 @@ func parse(r io.Reader) (State, error) {
 	if !ok || total == 0 {
 		return State{}, fmt.Errorf("memory: no MemTotal in /proc/meminfo")
 	}
+	// Fedora 44's kernel always reports MemAvailable, so there is no fallback for kernels that do not.
 	available, ok := kb["MemAvailable"]
-	if !ok { // kernels before 3.14
-		available = kb["MemFree"] + kb["Buffers"] + kb["Cached"]
+	if !ok {
+		return State{}, fmt.Errorf("memory: no MemAvailable in /proc/meminfo")
 	}
 	available = min(available, total)
 

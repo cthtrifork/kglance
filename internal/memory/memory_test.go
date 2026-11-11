@@ -33,16 +33,6 @@ func TestParse(t *testing.T) {
 	}
 }
 
-func TestParseWithoutAvailableUsesFreeAndCaches(t *testing.T) {
-	got, err := parse(strings.NewReader("MemTotal: 1000 kB\nMemFree: 100 kB\nBuffers: 50 kB\nCached: 350 kB\n"))
-	if err != nil {
-		t.Fatal(err)
-	}
-	if want := uint64(500 * 1024); got.UsedBytes != want {
-		t.Fatalf("UsedBytes = %d, want %d", got.UsedBytes, want)
-	}
-}
-
 func TestParseNoSwap(t *testing.T) {
 	got, err := parse(strings.NewReader("MemTotal: 1000 kB\nMemAvailable: 400 kB\nSwapTotal: 0 kB\nSwapFree: 0 kB\n"))
 	if err != nil || got.SwapUsedBytes != 0 {
@@ -58,7 +48,7 @@ func TestParseClampsAvailableToTotal(t *testing.T) {
 }
 
 func TestParseRejectsGarbage(t *testing.T) {
-	for _, in := range []string{"", "MemFree: 5 kB\n", "MemTotal: 0 kB\n", "MemTotal: lots kB\n"} {
+	for _, in := range []string{"", "MemFree: 5 kB\n", "MemTotal: 0 kB\n", "MemTotal: lots kB\n", "MemTotal: 1000 kB\nMemFree: 100 kB\n"} {
 		if _, err := parse(strings.NewReader(in)); err == nil {
 			t.Errorf("parse(%q) succeeded, want an error", in)
 		}

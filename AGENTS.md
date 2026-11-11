@@ -14,7 +14,8 @@ make lint           # golangci-lint plus Biome and knip for the frontend
 make format         # gofmt plus Biome
 make frontend       # frontend -> frontend/dist (embedded by the binary); needed before build/run, not before vet/test
 make build          # release binary, CGO-free (BACKEND=cgo for Wails' cgo backend)
-make rpm            # the Fedora package (needs nfpm)
+make rpm            # the Fedora package (needs the wails3 CLI)
+make screenshots    # popup in every demo state, light and dark, into screenshots/ (needs Playwright's Chromium; CI renders them too)
 ```
 
 ## Rules that are easy to get wrong

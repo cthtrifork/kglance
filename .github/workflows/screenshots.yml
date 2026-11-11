@@ -1,0 +1,64 @@
+name: Screenshots
+
+# Renders the popup in every demo state, light and dark, with Playwright and uploads the pictures as an
+# artifact, so a UI change can be reviewed without running the app. The pictures are never committed.
+# The frontend's demo mode (`?demo=battery|charging|low|ac`, dev server only) feeds the page fixed data.
+# It uses a paths filter, so do not mark it as a required check.
+on:
+  pull_request:
+    paths:
+      - frontend/**
+      - .github/workflows/screenshots.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: screenshots-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  screenshots:
+    name: screenshots
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .tool-versions
+          package-manager-cache: false
+
+      - name: Install the frontend
+        working-directory: frontend
+        run: npm ci --ignore-scripts --no-audit --no-fund
+
+      # The browser version follows the playwright-core version in frontend/package-lock.json.
+      - name: Install Chromium
+        working-directory: frontend
+        run: npx playwright-core install --with-deps chromium
+
+      - name: Render the screenshots
+        working-directory: frontend
+        run: node scripts/screenshots.mjs ../screenshots
+
+      - name: List the screenshots in the job summary
+        run: |
+          {
+            echo "### Popup screenshots"
+            echo
+            echo "Download the \`popup-screenshots\` artifact below. Rendered in demo mode with the clock fixed at 2026-11-10 23:50:47."
+            echo
+            for f in screenshots/*.png; do echo "- ${f#screenshots/}"; done
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: popup-screenshots
+          path: screenshots/
+          if-no-files-found: error
+          retention-days: 14

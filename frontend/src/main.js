@@ -51,8 +51,7 @@ function stopClock() {
 function renderPower(state) {
   const view = describePower(state);
   $("power").dataset.kind = view.kind;
-  $("power").dataset.low = String(view.low);
-  $("power").dataset.caution = String(view.caution);
+  $("power").dataset.tone = view.tone;
   $("power").dataset.bars = String(view.bars);
   $("power-title").textContent = view.title;
   $("power-detail").textContent = view.detail;

@@ -9,33 +9,39 @@ export function formatDuration(seconds) {
   return h > 0 ? `${h} h ${String(m).padStart(2, "0")} min` : `${m} min`;
 }
 
-/**
- * What the power row shows for a state from the Go side ({present, percentage, status, secondsLeft}).
- * kind is "ac" (no battery), "battery", "charging" or "full"; percent is null when there is no bar;
- * low is true on a battery at or below LOW_PERCENT. bars (0 to 3) is how many bars the battery icon lights,
- * and caution is true on a battery under half that is not yet low (the icon turns orange).
- */
-const LOW_PERCENT = 15;
-const HALF_PERCENT = 50;
+const RED_BELOW = 30;
+const GREEN_FROM = 70;
 
-/** The lit bars of the battery icon for a percentage: 3 from 67%, 2 from 34%, 1 from 5%, else 0. */
+/** The lit bars of the battery icon for a percentage: 3 from 70%, 2 from 30%, else 1. */
 export function batteryBars(percent) {
-  if (percent >= 67) return 3;
-  if (percent >= 34) return 2;
-  if (percent >= 5) return 1;
-  return 0;
+  if (percent >= GREEN_FROM) return 3;
+  if (percent >= RED_BELOW) return 2;
+  return 1;
 }
 
+/** The colour of a battery that is running down: green from 70%, orange from 30%, red below. */
+export function batteryTone(percent) {
+  if (percent >= GREEN_FROM) return "good";
+  if (percent >= RED_BELOW) return "caution";
+  return "warn";
+}
+
+/**
+ * What the power row shows for a state from the Go side ({present, percentage, status, secondsLeft}).
+ * kind is "ac" (no battery), "battery", "charging" or "full"; percent is null when there is no bar.
+ * bars (0 to 3) is how many bars the battery icon lights: 3 from 70%, 2 from 30%, else 1 (0 without a battery).
+ * tone is the colour, one per bar count on a battery: "good" (green, 3 bars), "caution" (orange, 2) or "warn" (red, 1).
+ * Charging, fully charged and no battery are always "good".
+ */
 export function describePower(state) {
   if (!state?.present) {
-    return { kind: "ac", title: "On AC", detail: "No battery detected", percent: null, low: false, caution: false, bars: 0 };
+    return { kind: "ac", title: "On AC", detail: "No battery detected", percent: null, tone: "good", bars: 0 };
   }
   const percent = Math.max(0, Math.min(100, Math.round(state.percentage)));
   const title = `${percent}%`;
   const left = formatDuration(state.secondsLeft);
-  const low = percent <= LOW_PERCENT;
   const bars = batteryBars(percent);
-  const caution = !low && percent < HALF_PERCENT;
+  const tone = batteryTone(percent);
   switch (state.status) {
     case "charging":
       return {
@@ -43,21 +49,20 @@ export function describePower(state) {
         title,
         detail: left ? `Charging · ${left} until full` : "Charging",
         percent,
-        low: false,
-        caution: false,
+        tone: "good",
         bars,
       };
     case "discharging":
-      return { kind: "battery", title, detail: left ? `On battery · ${left} left` : "On battery", percent, low, caution, bars };
+      return { kind: "battery", title, detail: left ? `On battery · ${left} left` : "On battery", percent, tone, bars };
     case "fully-charged":
-      return { kind: "full", title, detail: "Fully charged", percent, low: false, caution: false, bars };
+      return { kind: "full", title, detail: "Fully charged", percent, tone: "good", bars };
     case "empty":
-      return { kind: "battery", title, detail: "Empty", percent, low: true, caution: false, bars };
+      return { kind: "battery", title, detail: "Empty", percent, tone: "warn", bars };
     case "pending-charge":
     case "pending-discharge":
-      return { kind: "battery", title, detail: "Not charging", percent, low: false, caution, bars };
+      return { kind: "battery", title, detail: "Not charging", percent, tone, bars };
     default:
-      return { kind: "battery", title, detail: "", percent, low: false, caution, bars };
+      return { kind: "battery", title, detail: "", percent, tone, bars };
   }
 }
 

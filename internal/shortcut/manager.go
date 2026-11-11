@@ -56,18 +56,22 @@ type accel interface {
 
 // register announces the action, sets its default, and returns the keys that are active: the user's
 // own binding if KGlobalAccel has one, otherwise the default.
+//
+// The default goes first, as in KDE's own client library: a freshly registered action loads its saved
+// binding and, with none saved, falls back to its default keys. Setting the active keys first leaves a
+// new action with no default to fall back to, so nothing is bound.
 func register(a accel, def int32) ([]int32, error) {
 	id := actionID()
 	if err := a.doRegister(id); err != nil {
 		return nil, fmt.Errorf("register action: %w", err)
 	}
+	if _, err := a.setShortcut(id, []int32{def}, flagSetPresent|flagIsDefault); err != nil {
+		return nil, fmt.Errorf("set default shortcut: %w", err)
+	}
 	// Without NoAutoloading, KGlobalAccel replaces the keys passed here with the saved ones, if any.
 	active, err := a.setShortcut(id, []int32{def}, flagSetPresent)
 	if err != nil {
 		return nil, fmt.Errorf("set shortcut: %w", err)
-	}
-	if _, err := a.setShortcut(id, []int32{def}, flagSetPresent|flagIsDefault); err != nil {
-		return nil, fmt.Errorf("set default shortcut: %w", err)
 	}
 	return active, nil
 }

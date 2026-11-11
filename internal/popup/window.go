@@ -5,6 +5,7 @@ import (
 	"sync"
 	"sync/atomic"
 
+	"github.com/cthtrifork/kglance/internal/gtkstyle"
 	"github.com/cthtrifork/kglance/internal/layershell"
 	"github.com/wailsapp/wails/v3/pkg/application"
 	"github.com/wailsapp/wails/v3/pkg/events"
@@ -35,11 +36,12 @@ func New(app *application.App, svc *Service) *Popup {
 		URL:    "/",
 		Hidden: true,
 		// Used when layer-shell is not available; with layer-shell the compositor sizes the surface.
-		Width:         340,
-		Height:        400,
-		Frameless:     true,
-		DisableResize: true,
-		AlwaysOnTop:   true,
+		Width:     340,
+		Height:    400,
+		Frameless: true,
+		// Not DisableResize: a layer-shell surface is sized by the compositor (full screen), and a
+		// non-resizable GtkWindow ignores that and stays at its default size in the corner.
+		AlwaysOnTop: true,
 		// Transparent, so the rounded card floats on the desktop (and, with layer-shell, the rest of the
 		// full-screen surface is invisible).
 		BackgroundType:   application.BackgroundTypeTransparent,
@@ -72,11 +74,16 @@ func (p *Popup) LayerShell() bool { return p.layer.Load() }
 func (p *Popup) prepare() {
 	p.prepareOnce.Do(func() {
 		application.InvokeSync(func() {
+			// The GtkWindow itself must be see-through, or the card sits on a grey rectangle.
+			if err := gtkstyle.TransparentWindows(); err != nil {
+				log.Printf("popup: window background stays opaque: %v", err)
+			}
 			err := layershell.Setup(p.window.NativeWindow(), "kglance")
 			if err != nil {
 				log.Printf("popup: no layer-shell, using a plain window: %v", err)
 				return
 			}
+			log.Printf("popup: layer-shell active")
 			p.layer.Store(true)
 		})
 	})

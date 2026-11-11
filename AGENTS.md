@@ -38,6 +38,7 @@ make screenshots    # popup in every demo state, light and dark, into screenshot
 | `main.go` | Entry point: flags (`--version`, `--toggle`), Wails app and window |
 | `internal/version` | Build version, stamped with `-ldflags -X` |
 | `internal/layershell` | `gtk4-layer-shell` through purego: centres a full-screen overlay on the active output |
+| `internal/gtkstyle` | CSS through purego that makes the GtkWindow background transparent (Wails only makes the web view transparent) |
 | `internal/popup` | Window controller: show, hide, toggle, hide on Escape, backdrop click and focus loss |
 | `internal/shortcut` | KGlobalAccel registration and the `globalShortcutPressed` listener (godbus) |
 | `internal/power` | UPower reader and property-change subscription |

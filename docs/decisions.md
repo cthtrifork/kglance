@@ -38,6 +38,6 @@ The UI is a clock, a date and a battery row. No framework. Vite bundles `@wailsi
 
 No Copr, no rpm repository, no tarball, no deb. The raw binary needs GTK4, WebKitGTK 6 and gtk4-layer-shell installed; the rpm pulls them in, so the README recommends it.
 
-## 8. The battery icon shows three bars, with the colour doing the warning
+## 8. The battery icon is a three-state traffic light
 
-A 24 px icon cannot show five levels apart, and the bar under the icon already shows the exact percentage. So the icon lights three bars (3 from 67%, 2 from 34%, 1 from 5%), and the colour says how urgent it is: blue, orange under 50%, red at 15% or less (LOW_PERCENT), green while charging or full. Over half and under half can therefore light the same bars in different colours. The charging bolt has a halo in the card colour so it stays visible on lit bars. The thresholds live in `frontend/src/format.js`.
+A 24 px icon cannot show many levels apart, and the bar under the icon already shows the exact percentage. So the icon lights 1, 2 or 3 bars and each bar count has exactly one colour: 3 bars green from 70%, 2 bars orange from 30%, 1 bar red below 30% (an earlier idea let two colours share a bar count, which made the colour and the bars disagree). Charging and fully charged stay green at every level and add a bolt, so the bars show the level while the colour and the bolt say it is charging. `empty` is always red. The bolt has a halo in the card colour so it stays visible on lit bars. The thresholds live in `frontend/src/format.js`.

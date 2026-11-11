@@ -31,7 +31,7 @@ test("charging (mockup 2)", () => {
     title: "38%",
     detail: "Charging · 1 h 05 min until full",
     percent: 38,
-    tone: "good",
+    tone: "charge",
     bars: 2,
   });
 });
@@ -43,7 +43,7 @@ test("desktop without a battery (mockup 3)", () => {
     title: "On AC",
     detail: "No battery detected",
     percent: null,
-    tone: "good",
+    tone: "charge",
     bars: 0,
   });
   assert.equal(describePower(undefined).kind, "ac");
@@ -76,10 +76,19 @@ test("battery bars and colour", () => {
     assert.deepEqual([on(45, status).bars, on(45, status).tone], [2, "caution"], status);
     assert.deepEqual([on(10, status).bars, on(10, status).tone], [1, "warn"], status);
   }
-  // Charging and fully charged stay green at every level; the bars still show the level.
-  assert.deepEqual([on(10, "charging").bars, on(10, "charging").tone], [1, "good"]);
-  assert.deepEqual([on(45, "charging").bars, on(45, "charging").tone], [2, "good"]);
+  // Charging is blue at every level but red below 30%; the bars still show the level. Fully charged is green.
+  for (const [percent, bars, tone] of [
+    [95, 3, "charge"],
+    [70, 3, "charge"],
+    [45, 2, "charge"],
+    [30, 2, "charge"],
+    [29, 1, "warn"],
+    [0, 1, "warn"],
+  ]) {
+    assert.deepEqual([on(percent, "charging").bars, on(percent, "charging").tone], [bars, tone], `charging ${percent}%`);
+  }
   assert.deepEqual([on(95, "fully-charged").bars, on(95, "fully-charged").tone], [3, "good"]);
+  assert.equal(on(10, "fully-charged").tone, "good");
   assert.equal(on(90, "empty").tone, "warn");
 });
 

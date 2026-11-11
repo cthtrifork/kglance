@@ -30,18 +30,19 @@ export function batteryTone(percent) {
  * What the power row shows for a state from the Go side ({present, percentage, status, secondsLeft}).
  * kind is "ac" (no battery), "battery", "charging" or "full"; percent is null when there is no bar.
  * bars (0 to 3) is how many bars the battery icon lights: 3 from 70%, 2 from 30%, else 1 (0 without a battery).
- * tone is the colour, one per bar count on a battery: "good" (green, 3 bars), "caution" (orange, 2) or "warn" (red, 1).
- * Charging, fully charged and no battery are always "good".
+ * tone is the colour. Running on the battery it follows the bars: "good" (green, 3), "caution" (orange, 2) or "warn" (red, 1).
+ * Charging and no battery are "charge" (blue), but a charging battery below 30% is "warn" (red); fully charged is "good".
  */
 export function describePower(state) {
   if (!state?.present) {
-    return { kind: "ac", title: "On AC", detail: "No battery detected", percent: null, tone: "good", bars: 0 };
+    return { kind: "ac", title: "On AC", detail: "No battery detected", percent: null, tone: "charge", bars: 0 };
   }
   const percent = Math.max(0, Math.min(100, Math.round(state.percentage)));
   const title = `${percent}%`;
   const left = formatDuration(state.secondsLeft);
   const bars = batteryBars(percent);
   const tone = batteryTone(percent);
+  const chargingTone = tone === "warn" ? "warn" : "charge";
   switch (state.status) {
     case "charging":
       return {
@@ -49,7 +50,7 @@ export function describePower(state) {
         title,
         detail: left ? `Charging · ${left} until full` : "Charging",
         percent,
-        tone: "good",
+        tone: chargingTone,
         bars,
       };
     case "discharging":

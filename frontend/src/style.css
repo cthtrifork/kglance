@@ -91,21 +91,20 @@ hr {
   margin: 14px 0;
 }
 
-/* Power row: the colour says the state (blue on battery, orange under half, green charging or full, red when low). */
+/* Power row: the colour says the state (green from 70%, orange from 30%, red below; blue while charging or on AC). */
 #power {
   --tone: var(--accent);
 }
 
-#power[data-kind="charging"],
-#power[data-kind="full"] {
+#power[data-tone="good"] {
   --tone: var(--good);
 }
 
-#power[data-caution="true"] {
+#power[data-tone="caution"] {
   --tone: var(--caution);
 }
 
-#power[data-low="true"] {
+#power[data-tone="warn"] {
   --tone: var(--warn);
 }
 

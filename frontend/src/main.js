@@ -4,6 +4,7 @@ import { Hide, Info } from "../bindings/github.com/cthtrifork/kglance/internal/p
 const backdrop = document.getElementById("backdrop");
 const card = document.getElementById("card");
 const shortcut = document.getElementById("shortcut");
+const shortcutHint = document.getElementById("shortcut-hint");
 
 // Close on Escape, and on a click outside the card (the card swallows its own clicks).
 document.addEventListener("keydown", (event) => {
@@ -17,6 +18,8 @@ backdrop.addEventListener("click", (event) => {
 async function refresh() {
   const info = await Info();
   shortcut.textContent = info.shortcut;
+  // The user may have cleared the shortcut in System Settings; then there is nothing to advertise.
+  shortcutHint.hidden = info.shortcut === "";
   document.documentElement.classList.toggle("layer", info.layer);
 }
 

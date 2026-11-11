@@ -3,6 +3,7 @@
 package main
 
 import (
+	"context"
 	"embed"
 	"flag"
 	"fmt"
@@ -13,8 +14,10 @@ import (
 
 	"github.com/cthtrifork/kglance/internal/layershell"
 	"github.com/cthtrifork/kglance/internal/popup"
+	"github.com/cthtrifork/kglance/internal/shortcut"
 	"github.com/cthtrifork/kglance/internal/version"
 	"github.com/wailsapp/wails/v3/pkg/application"
+	"github.com/wailsapp/wails/v3/pkg/events"
 )
 
 // appID is the GTK application id, the Wayland app_id and the single-instance key. It must equal the
@@ -29,7 +32,7 @@ func main() {
 	_ = layershell.Preload()
 
 	showVersion := flag.Bool("version", false, "print the version and exit")
-	toggle := flag.Bool("toggle", false, "toggle the popup of the running instance (starts the app if none runs)")
+	toggleFlag := flag.Bool("toggle", false, "toggle the popup of the running instance (starts the app if none runs)")
 	flag.Parse()
 	if *showVersion {
 		fmt.Println("kglance", version.Version)
@@ -42,7 +45,13 @@ func main() {
 	}
 
 	var pop atomic.Pointer[popup.Popup]
-	svc := popup.NewService(nil)
+	toggle := func() {
+		if p := pop.Load(); p != nil {
+			p.Toggle()
+		}
+	}
+	keys := shortcut.New(toggle)
+	svc := popup.NewService(keys.Text)
 
 	app := application.New(application.Options{
 		Name:        "KGlance",
@@ -61,13 +70,9 @@ func main() {
 		SingleInstance: &application.SingleInstanceOptions{
 			UniqueID: appID,
 			OnSecondInstanceLaunch: func(data application.SecondInstanceData) {
-				p := pop.Load()
-				if p == nil {
-					return
-				}
 				if slices.Contains(data.Args, "--toggle") {
-					p.Toggle()
-				} else {
+					toggle()
+				} else if p := pop.Load(); p != nil {
 					p.Show()
 				}
 			},
@@ -76,9 +81,21 @@ func main() {
 
 	p := popup.New(app, svc)
 	pop.Store(p)
-	if *toggle {
+	if *toggleFlag {
 		p.ShowWhenReady()
 	}
+
+	// Register the global shortcut once the app is running. Without a session bus or KGlobalAccel (not
+	// KDE) the app still works through `kglance --toggle`.
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	app.Event.OnApplicationEvent(events.Common.ApplicationStarted, func(*application.ApplicationEvent) {
+		go func() {
+			if err := keys.Start(ctx); err != nil {
+				log.Printf("global shortcut unavailable (use `kglance --toggle`): %v", err)
+			}
+		}()
+	})
 
 	if err := app.Run(); err != nil {
 		log.Fatal(err)

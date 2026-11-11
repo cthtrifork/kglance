@@ -11,7 +11,7 @@ type Info struct {
 	// Layer is true when the popup is a full-screen layer-shell surface: the page then has to treat a
 	// click outside the card as "close".
 	Layer bool `json:"layer"`
-	// Shortcut is the current global shortcut, as text such as "Meta+Alt+G".
+	// Shortcut is the current global shortcut, as text such as "Meta+Alt+G"; empty when there is none.
 	Shortcut string `json:"shortcut"`
 }
 
@@ -23,7 +23,7 @@ type Service struct {
 }
 
 // NewService returns a service that is connected to a popup by New. shortcut returns the current
-// global shortcut as text; nil, or an empty result, means DefaultShortcut. (It is a constructor
+// global shortcut as text (empty when the user cleared it); nil means DefaultShortcut. (It is a constructor
 // argument and not a method because every exported method of a service is bound to the page.)
 func NewService(shortcut func() string) *Service { return &Service{shortcut: shortcut} }
 
@@ -40,9 +40,7 @@ func (s *Service) Hide() {
 func (s *Service) Info() Info {
 	info := Info{Shortcut: DefaultShortcut}
 	if s.shortcut != nil {
-		if t := s.shortcut(); t != "" {
-			info.Shortcut = t
-		}
+		info.Shortcut = s.shortcut()
 	}
 	if p := s.popup.Load(); p != nil {
 		info.Layer = p.LayerShell()

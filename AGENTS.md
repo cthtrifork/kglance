@@ -14,7 +14,7 @@ make lint           # golangci-lint plus Biome and knip for the frontend
 make format         # gofmt plus Biome
 make dev            # Vite dev server with hot reload (add ?demo=charging); the dev container forwards it, see docs/devcontainer.md
 make frontend       # frontend -> frontend/dist (embedded by the binary); needed before build/run, not before vet/test
-make frontend-wasm  # same as `make frontend`, for a CPU without AVX2 (Vite 8's native bundler crashes there): Node 26 in podman with Rolldown's WebAssembly build
+make frontend-wasm  # same as `make frontend`, for a CPU without AVX2 (Vite 8's native bundler crashes there): Rolldown's WebAssembly build on Node 26, directly in the dev container or in its image via podman
 make build          # release binary, CGO-free (BACKEND=cgo for Wails' cgo backend)
 make rpm            # the Fedora package (needs the wails3 CLI)
 make screenshots    # popup in every demo state, light and dark, into screenshots/ (needs Playwright's Chromium; CI renders them too)

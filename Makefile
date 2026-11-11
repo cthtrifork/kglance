@@ -34,8 +34,6 @@ NPM_CI := npm ci --ignore-scripts --no-audit --no-fund
 GOLANGCI_LINT_VERSION := v2.15.0
 # renovate: datasource=go depName=golang.org/x/tools
 GOIMPORTS_VERSION := v0.52.0
-# renovate: datasource=docker depName=mirror.gcr.io/library/node
-NODE_IMAGE_TAG := 26-trixie-slim
 
 .DEFAULT_GOAL := help
 .PHONY: help check test vet lint lint-go lint-frontend fmt format format-frontend tools \
@@ -85,12 +83,23 @@ frontend: ## Build the frontend into frontend/dist (embedded by the Go binary)
 
 # Vite 8's native bundler (Rolldown) needs AVX2, which some CPUs (Intel Jasper Lake, such as the Celeron
 # N4505) lack: it dies with "Illegal instruction". Rolldown also ships a WebAssembly build; it only works
-# on Node 26, so this runs in a container. Not needed in CI or on any CPU from the last decade.
-frontend-wasm: ## Build the frontend on a CPU without AVX2 (Node 26 in podman, Rolldown's WebAssembly build)
-	podman run --rm -v "$(CURDIR)/frontend:/src" -w /src -e NAPI_RS_FORCE_WASI=error -e npm_config_cache=/tmp/npm \
-		mirror.gcr.io/library/node:$(NODE_IMAGE_TAG) sh -c '$(NPM_CI) && \
-		npm install --no-save --ignore-scripts --no-audit --no-fund "@rolldown/binding-wasm32-wasi@$$(node -p "require(\"./node_modules/rolldown/package.json\").version")" && \
-		npm run build'
+# on Node 26. Where `node` is already v26 (the dev container) the build runs right here; anywhere else it
+# runs in the dev container's image, built with podman from .devcontainer/Dockerfile, so Node 26 is
+# pinned in one place. Not needed in CI or on any CPU from the last decade.
+DEVCONTAINER_IMAGE := localhost/kglance-dev
+# Recursive (=) on purpose: the $$ must reach the shell as a single $.
+WASM_BUILD = $(NPM_CI) && \
+	npm install --no-save --ignore-scripts --no-audit --no-fund "@rolldown/binding-wasm32-wasi@$$(node -p "require(\"./node_modules/rolldown/package.json\").version")" && \
+	npm run build
+
+frontend-wasm: ## Build the frontend on a CPU without AVX2 (Rolldown's WebAssembly build on Node 26; podman if node is not v26)
+ifeq ($(shell node --version 2>/dev/null | cut -d. -f1),v26)
+	cd frontend && NAPI_RS_FORCE_WASI=error sh -c '$(WASM_BUILD)'
+else
+	podman build -q -t $(DEVCONTAINER_IMAGE) .devcontainer
+	podman run --rm --user root -v "$(CURDIR)/frontend:/src" -w /src -e NAPI_RS_FORCE_WASI=error -e npm_config_cache=/tmp/npm \
+		$(DEVCONTAINER_IMAGE) sh -c '$(WASM_BUILD)'
+endif
 
 screenshots: ## Render the popup in every demo state into screenshots/ (needs `npx playwright-core install chromium` once)
 	cd frontend && $(NPM_CI) && node scripts/screenshots.mjs ../screenshots

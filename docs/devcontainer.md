@@ -30,7 +30,7 @@ The container user is `vscode` with `updateRemoteUserUID` on, so on Linux it tak
 
 ## Limits
 
-- **CPUs without AVX2** (for example an Intel Celeron N4505): Vite 8's native bundler dies with "Illegal instruction", in a container too, because it uses the host CPU. `make dev` and `make frontend` fail there; use `make frontend-wasm` from the host (Node 26 in podman with Rolldown's WebAssembly build). CI and any CPU from the last decade are unaffected.
+- **CPUs without AVX2** (for example an Intel Celeron N4505): Vite 8's native bundler dies with "Illegal instruction", in a container too, because it uses the host CPU. `make dev` and `make frontend` fail there; use `make frontend-wasm` instead. It builds with Rolldown's WebAssembly build, which only works on Node 26: inside the dev container (Node 26) it runs directly, and on the host it builds this dev container's image with podman and runs the build in it, so Node 26 is pinned in one place, `.devcontainer/Dockerfile`. CI and any CPU from the last decade are unaffected.
 - **The real popup** (layer-shell, KGlobalAccel, UPower) needs a KDE session; see `AGENTS.md`.
 
 ## Troubleshooting

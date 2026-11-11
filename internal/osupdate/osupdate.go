@@ -18,29 +18,44 @@ const timeout = 5 * time.Second
 
 // State is what the popup shows about OS updates. Its JSON form is the return value of Service.State.
 type State struct {
+	// Known is false when rpm-ostree could not be asked or reported no usable deployment.
+	Known bool `json:"known"`
 	// Staged is true when a new image is staged and applies on the next reboot.
 	Staged bool `json:"staged"`
-	// Version is the staged image's version, for example "latest.20261111"; "" when there is none.
+	// Version is the version of the staged image, or of the booted one when none is staged, for example
+	// "latest.20261111"; "" when the image carries none.
 	Version string `json:"version"`
+	// Timestamp is when that image was built, in Unix seconds; 0 when unknown.
+	Timestamp int64 `json:"timestamp"`
 }
 
-// parse reads the output of `rpm-ostree status --json`.
+// parse reads the output of `rpm-ostree status --json`: the staged deployment if there is one, else the booted one.
 func parse(out []byte) (State, error) {
 	var status struct {
 		Deployments []struct {
-			Staged  bool   `json:"staged"`
-			Version string `json:"version"`
+			Booted    bool   `json:"booted"`
+			Staged    bool   `json:"staged"`
+			Version   string `json:"version"`
+			Timestamp int64  `json:"timestamp"`
 		} `json:"deployments"`
 	}
 	if err := json.Unmarshal(out, &status); err != nil {
 		return State{}, fmt.Errorf("osupdate: %w", err)
 	}
+	var booted *State
 	for _, d := range status.Deployments {
+		st := State{Known: true, Staged: d.Staged, Version: d.Version, Timestamp: d.Timestamp}
 		if d.Staged {
-			return State{Staged: true, Version: d.Version}, nil
+			return st, nil
+		}
+		if d.Booted {
+			booted = &st
 		}
 	}
-	return State{}, nil
+	if booted == nil {
+		return State{}, nil
+	}
+	return *booted, nil
 }
 
 // Read runs rpm-ostree and returns the current state. It fails when rpm-ostree is missing or errors, for
@@ -64,7 +79,7 @@ type Service struct {
 // constructor argument and not a method because every exported method of a service is bound to the page.
 func NewService(read func(context.Context) (State, error)) *Service { return &Service{read: read} }
 
-// State returns the staged-update state; the zero State (nothing staged) when it cannot be read.
+// State returns the staged-update state; the zero State (not known) when it cannot be read.
 func (s *Service) State() State {
 	st, err := s.read(context.Background())
 	if err != nil {

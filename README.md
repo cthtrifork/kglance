@@ -4,16 +4,19 @@ KGlance is a tiny popup/widget for KDE Plasma. Press a shortcut, it appears. Cli
 
 It shows the time, the date, the power status and memory use. Power is the battery percentage, charging state and time left, or "On AC" on a machine without a battery; memory is used of total, with swap when it is in use, and turns red when nearly full. Battery changes show up live, memory is read every two seconds, and nothing ticks while the popup is hidden.
 
+A small pill above the footer shows the OS update state: `OS update: staged · latest.20261111 · 2h` when a new image is staged for the next reboot, `OS update: none · <version> · <age>` (the running image) otherwise, and `OS update: unknown` when it cannot be read. The age (`2h`, `3d`) is how long ago that image was built. This pill is made for one kind of system, an image-based Fedora (bootc/ostree), see below.
+
 Inspired by [Lusan-sapkota/KGlance](https://github.com/Lusan-sapkota/KGlance), and much simpler: one Go binary, no world clock, no calendar, no notification history.
 
 ![screenshot of the widget](https://github.com/cthtrifork/kglance/blob/bot/update-screenshots/screenshots/popup-battery-light.png)
 
 ## Requirements
 
-Fedora 44 with KDE Plasma 6 on Wayland is the only supported platform.
+Fedora 44 with KDE Plasma 6 on Wayland is the only supported platform. KGlance is built for one specific target, the author's own machines: a Fedora 44 KDE desktop installed as a bootc (image-based, ostree) system, from [homeserver-bootc](https://github.com/cthtrifork/homeserver-bootc). It also works on a regular package-based Fedora 44 KDE, except for the OS update pill, which needs `rpm-ostree` and shows `OS update: unknown` without it.
 
 - **KDE Plasma** provides the global shortcut (KGlobalAccel). On another desktop the popup still works through `kglance --toggle`, but there is no built-in shortcut.
 - **gtk4-layer-shell** lets the compositor centre the popup on the active screen, which Wayland does not allow an ordinary window to do. Without it (or on X11) the popup falls back to a plain window that is centred by the toolkit and hides when it loses focus.
+- **rpm-ostree** (present on Fedora's image-based/bootc systems) provides the OS update pill. KGlance runs `rpm-ostree status --json` as your user each time the popup is shown; it needs no root and only reads what the host already knows. It never checks a registry or downloads anything, so an update shows as "staged" only after the system's own `bootc upgrade` has fetched it, and the pill clears after the reboot that applies it.
 - **UPower** (normally installed on a Plasma desktop; the rpm recommends it) provides the battery state. Without it the popup shows "On AC".
 - **GTK 4 and WebKitGTK 6** draw the window. They are loaded at run time, so the binary has no build-time dependency on them.
 
@@ -55,7 +58,7 @@ Screenshots are never committed. Every pull request that touches the frontend ge
 make help       # every target, grouped
 make check      # gofmt, tidy, vet, tests (Go and frontend)
 make lint       # golangci-lint, Biome, knip
-make dev        # Vite dev server with hot reload; add ?demo=charging (battery|charging|low|ac) to the URL, and &update=staged for the OS update marker
+make dev        # Vite dev server with hot reload; add ?demo=charging (battery|charging|low|ac) to the URL, and &update=staged|none|unknown for the OS update pill
 make build      # the single binary, CGO-free; needs no GTK headers
 make rpm        # the Fedora package (needs the wails3 CLI: make wails3-install)
 make screenshots

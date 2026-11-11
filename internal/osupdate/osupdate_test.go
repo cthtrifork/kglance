@@ -7,15 +7,16 @@ import (
 )
 
 const staged = `{"deployments":[
- {"booted":false,"staged":true,"version":"latest.20261111"},
- {"booted":true,"staged":false,"version":"latest.20261108"}]}`
+ {"booted":false,"staged":true,"version":"latest.20261111","timestamp":300},
+ {"booted":true,"staged":false,"version":"latest.20261108","timestamp":200}]}`
 
 func TestParse(t *testing.T) {
 	cases := map[string]State{
-		staged: {Staged: true, Version: "latest.20261111"},
-		`{"deployments":[{"booted":true,"staged":false,"version":"x"}]}`: {},
-		`{"deployments":[]}`: {},
-		`{}`:                 {},
+		staged: {Known: true, Staged: true, Version: "latest.20261111", Timestamp: 300},
+		`{"deployments":[{"booted":true,"staged":false,"version":"x","timestamp":5},{"booted":false,"version":"old"}]}`: {Known: true, Version: "x", Timestamp: 5},
+		`{"deployments":[{"booted":true}]}`: {Known: true},
+		`{"deployments":[]}`:                {},
+		`{}`:                                {},
 	}
 	for in, want := range cases {
 		got, err := parse([]byte(in))
@@ -32,7 +33,7 @@ func TestParseRejectsGarbage(t *testing.T) {
 }
 
 func TestServiceReturnsZeroStateOnError(t *testing.T) {
-	s := NewService(func(context.Context) (State, error) { return State{Staged: true}, errors.New("boom") })
+	s := NewService(func(context.Context) (State, error) { return State{Known: true}, errors.New("boom") })
 	if got := s.State(); got != (State{}) {
 		t.Fatalf("State() = %+v, want the zero state", got)
 	}

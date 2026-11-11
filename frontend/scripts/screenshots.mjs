@@ -9,8 +9,15 @@ import { chromium } from "playwright-core";
 import { createServer } from "vite";
 
 const out = resolve(process.argv[2] ?? "../screenshots");
-// name -> query string; "update" is the battery state with the OS update marker.
-const states = { battery: "demo=battery", charging: "demo=charging", low: "demo=low", ac: "demo=ac", update: "demo=battery&update=staged" };
+// name -> query string; "update" and "unknown" are the battery state with the OS update pill staged or unreadable (the others show "none").
+const states = {
+  battery: "demo=battery",
+  charging: "demo=charging",
+  low: "demo=low",
+  ac: "demo=ac",
+  update: "demo=battery&update=staged",
+  unknown: "demo=battery&update=unknown",
+};
 const schemes = ["light", "dark"];
 // The time of the design mockups.
 const now = new Date("2026-11-10T23:50:47+01:00");

@@ -78,21 +78,20 @@ async function refreshMemory() {
   }
 }
 
-// OS update marker. The host already knows whether an image is staged (rpm-ostree reads local state, nothing is
-// fetched), so it is asked each time the popup is shown.
+// OS update pill. The host already knows whether an image is staged (rpm-ostree reads local state, nothing is
+// fetched), so it is asked each time the popup is shown. The pill is always there, so nothing shifts when it fills in.
 function renderUpdate(state) {
-  const view = describeUpdate(state);
-  $("update").hidden = view === null;
-  if (view === null) return;
-  $("update-text").textContent = view.text;
+  const view = describeUpdate(state, Date.now() / 1000);
+  $("update").dataset.kind = view.kind;
   $("update").title = view.title;
+  $("update-text").textContent = view.text;
 }
 
 async function refreshUpdate() {
   try {
     renderUpdate(await UpdateState());
   } catch {
-    // No marker is better than a wrong one; the next time the popup is shown tries again.
+    // The pill keeps what it showed; the next time the popup is shown tries again.
   }
 }
 

@@ -24,7 +24,14 @@ export function demoMemory(search) {
   return memory[new URLSearchParams(search).get("demo")] ?? null;
 }
 
-/** The OS update state that goes with ?update=staged, or null. */
+const updates = {
+  // 2026-11-10 20:50:47 UTC: two hours before the clock the screenshots fix.
+  staged: { known: true, staged: true, version: "latest.20261111", timestamp: 1794343847 },
+  none: { known: true, staged: false, version: "latest.20261110", timestamp: 1794247200 },
+  unknown: { known: false, staged: false, version: "", timestamp: 0 },
+};
+
+/** The OS update state named by &update=<name> (staged|none|unknown; none by default). */
 export function demoUpdate(search) {
-  return new URLSearchParams(search).get("update") === "staged" ? { staged: true, version: "latest.20261111" } : null;
+  return updates[new URLSearchParams(search).get("update")] ?? updates.none;
 }

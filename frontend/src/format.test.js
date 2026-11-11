@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { describeMemory, describePower, describeUpdate, formatDuration } from "./format.js";
+import { describeMemory, describePower, describeUpdate, formatAge, formatDuration } from "./format.js";
 
 test("formatDuration", () => {
   assert.equal(formatDuration(11520), "3 h 12 min");
@@ -57,9 +57,24 @@ test("memory threshold and unknown state", () => {
   assert.equal(describeMemory(undefined), null);
 });
 
-test("OS update marker", () => {
-  assert.equal(describeUpdate(null), null);
-  assert.equal(describeUpdate({ staged: false, version: "" }), null);
-  assert.equal(describeUpdate({ staged: true, version: "latest.20261111" }).text, "OS update staged · latest.20261111");
-  assert.equal(describeUpdate({ staged: true, version: "" }).text, "OS update staged");
+test("formatAge", () => {
+  assert.equal(formatAge(10), "now");
+  assert.equal(formatAge(12 * 60), "12m");
+  assert.equal(formatAge(2 * 3600 + 5), "2h");
+  assert.equal(formatAge(47 * 3600), "47h");
+  assert.equal(formatAge(3 * 86400), "3d");
+  assert.equal(formatAge(0), "");
+  assert.equal(formatAge(-5), "");
+});
+
+test("OS update pill", () => {
+  const now = 1000000;
+  assert.equal(describeUpdate(null, now).kind, "unknown");
+  assert.equal(describeUpdate({ known: false }, now).text, "OS update: unknown");
+  const staged = { known: true, staged: true, version: "latest.20261111", timestamp: now - 7200 };
+  assert.equal(describeUpdate(staged, now).text, "OS update: staged · latest.20261111 · 2h");
+  assert.equal(describeUpdate(staged, now).kind, "staged");
+  const none = { known: true, staged: false, version: "latest.20261110", timestamp: now - 86400 * 3 };
+  assert.equal(describeUpdate(none, now).text, "OS update: none · latest.20261110 · 3d");
+  assert.equal(describeUpdate({ known: true, staged: false, version: "", timestamp: 0 }, now).text, "OS update: none");
 });

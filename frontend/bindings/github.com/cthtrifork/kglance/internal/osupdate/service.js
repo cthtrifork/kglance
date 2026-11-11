@@ -16,7 +16,7 @@ import { Call as $Call, CancellablePromise as $CancellablePromise, Create as $Cr
 import * as $models from "./models.js";
 
 /**
- * State returns the staged-update state; the zero State (nothing staged) when it cannot be read.
+ * State returns the staged-update state; the zero State (not known) when it cannot be read.
  * @returns {$CancellablePromise<$models.State>}
  */
 export function State() {

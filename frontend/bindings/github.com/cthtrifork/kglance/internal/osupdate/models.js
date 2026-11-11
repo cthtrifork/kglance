@@ -15,6 +15,14 @@ export class State {
      * @param {Partial<State>} [$$source = {}] - The source object to create the State.
      */
     constructor($$source = {}) {
+        if (!("known" in $$source)) {
+            /**
+             * Known is false when rpm-ostree could not be asked or reported no usable deployment.
+             * @member
+             * @type {boolean}
+             */
+            this["known"] = false;
+        }
         if (!("staged" in $$source)) {
             /**
              * Staged is true when a new image is staged and applies on the next reboot.
@@ -25,11 +33,20 @@ export class State {
         }
         if (!("version" in $$source)) {
             /**
-             * Version is the staged image's version, for example "latest.20261111"; "" when there is none.
+             * Version is the version of the staged image, or of the booted one when none is staged, for example
+             * "latest.20261111"; "" when the image carries none.
              * @member
              * @type {string}
              */
             this["version"] = "";
+        }
+        if (!("timestamp" in $$source)) {
+            /**
+             * Timestamp is when that image was built, in Unix seconds; 0 when unknown.
+             * @member
+             * @type {number}
+             */
+            this["timestamp"] = 0;
         }
 
         Object.assign(this, $$source);

@@ -31,7 +31,12 @@ const updates = {
   unknown: { known: false, staged: false, version: "", timestamp: 0 },
 };
 
-/** The OS update state named by &update=<name> (staged|none|unknown; none by default). */
+/**
+ * The OS update state named by &update=<name> (staged|none|unknown). Without it, the charging demo shows a
+ * staged update and the others none, so the screenshots cover both without extra images.
+ */
 export function demoUpdate(search) {
-  return updates[new URLSearchParams(search).get("update")] ?? updates.none;
+  const params = new URLSearchParams(search);
+  const name = params.get("update") ?? (params.get("demo") === "charging" ? "staged" : "none");
+  return updates[name] ?? updates.none;
 }

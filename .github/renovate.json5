@@ -96,13 +96,6 @@
       matchUpdateTypes: ["major", "minor"],
       enabled: false,
     },
-    {
-      // Vite 8 ships a native bundler that needs a newer CPU baseline than the development VM has.
-      // Bumping Vite is a decision, not a routine update.
-      matchPackageNames: ["vite"],
-      matchUpdateTypes: ["major"],
-      enabled: false,
-    },
   ],
 
   customManagers: [

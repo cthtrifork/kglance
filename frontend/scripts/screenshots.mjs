@@ -9,7 +9,7 @@ import { chromium } from "playwright-core";
 import { createServer } from "vite";
 
 const out = resolve(process.argv[2] ?? "../screenshots");
-const states = ["battery", "charging", "low", "ac"];
+const states = ["battery", "charging", "low", "ac", "full", "over-half", "half", "under-half"];
 // Every state in light; dark only for one example (charging, which also shows the staged OS update pill).
 const darkStates = ["charging"];
 // The time of the design mockups.

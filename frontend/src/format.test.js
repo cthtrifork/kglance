@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { describeMemory, describePower, describeUpdate, formatAge, formatDuration } from "./format.js";
+import { batteryLevel, describeMemory, describePower, describeUpdate, formatAge, formatDuration } from "./format.js";
 
 test("formatDuration", () => {
   assert.equal(formatDuration(11520), "3 h 12 min");
@@ -14,17 +14,31 @@ test("formatDuration", () => {
 
 test("on battery (mockup 1)", () => {
   const view = describePower({ present: true, percentage: 72, status: "discharging", secondsLeft: 11520 });
-  assert.deepEqual(view, { kind: "battery", title: "72%", detail: "On battery · 3 h 12 min left", percent: 72, low: false });
+  assert.deepEqual(view, {
+    kind: "battery",
+    title: "72%",
+    detail: "On battery · 3 h 12 min left",
+    percent: 72,
+    low: false,
+    level: "over-half",
+  });
 });
 
 test("charging (mockup 2)", () => {
   const view = describePower({ present: true, percentage: 38, status: "charging", secondsLeft: 3900 });
-  assert.deepEqual(view, { kind: "charging", title: "38%", detail: "Charging · 1 h 05 min until full", percent: 38, low: false });
+  assert.deepEqual(view, {
+    kind: "charging",
+    title: "38%",
+    detail: "Charging · 1 h 05 min until full",
+    percent: 38,
+    low: false,
+    level: "under-half",
+  });
 });
 
 test("desktop without a battery (mockup 3)", () => {
   const view = describePower({ present: false, percentage: 0, status: "unknown", secondsLeft: 0 });
-  assert.deepEqual(view, { kind: "ac", title: "On AC", detail: "No battery detected", percent: null, low: false });
+  assert.deepEqual(view, { kind: "ac", title: "On AC", detail: "No battery detected", percent: null, low: false, level: "none" });
   assert.equal(describePower(undefined).kind, "ac");
 });
 
@@ -36,6 +50,24 @@ test("other states", () => {
   assert.equal(describePower({ present: true, percentage: 16, status: "discharging", secondsLeft: 600 }).low, false);
   assert.equal(describePower({ present: true, percentage: 5, status: "charging", secondsLeft: 600 }).low, false);
   assert.equal(describePower({ present: true, percentage: 99.6, status: "charging", secondsLeft: 0 }).percent, 100);
+});
+
+test("battery level bands", () => {
+  const bands = [
+    [100, "full"],
+    [80, "full"],
+    [79, "over-half"],
+    [60, "over-half"],
+    [59, "half"],
+    [40, "half"],
+    [39, "under-half"],
+    [16, "under-half"],
+    [15, "low"],
+    [0, "low"],
+  ];
+  for (const [percent, level] of bands) assert.equal(batteryLevel(percent), level, `${percent}%`);
+  assert.equal(describePower({ present: true, percentage: 90, status: "charging", secondsLeft: 0 }).level, "full");
+  assert.equal(describePower({ present: true, percentage: 50, status: "pending-discharge", secondsLeft: 0 }).level, "half");
 });
 
 const GiB = 2 ** 30;

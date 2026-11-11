@@ -52,6 +52,7 @@ function renderPower(state) {
   const view = describePower(state);
   $("power").dataset.kind = view.kind;
   $("power").dataset.low = String(view.low);
+  $("power").dataset.level = view.level;
   $("power-title").textContent = view.title;
   $("power-detail").textContent = view.detail;
   $("power-bar").hidden = view.percent === null;
@@ -105,7 +106,7 @@ async function refreshInfo() {
   document.documentElement.classList.toggle("layer", info.layer);
 }
 
-// `vite dev` with ?demo=battery|charging|low|ac shows a fixed power state without the Go side
+// `vite dev` with ?demo=battery|charging|low|ac|full|over-half|half|under-half shows a fixed power state without the Go side
 // (scripts/screenshots.mjs, design work). The branch is dead code in a production build.
 const demo = import.meta.env.DEV ? demoState(location.search) : null;
 

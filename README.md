@@ -50,7 +50,7 @@ Run `kglance` from a terminal; it logs why a part is unavailable.
 
 ## Screenshots
 
-Screenshots are never committed. Every pull request that touches the frontend gets a comment with the popup rendered in each demo state (battery, charging, low battery, no battery; light, and dark for one of them), and the draft pull request [Screenshots preview](https://github.com/cthtrifork/kglance/pulls?q=is%3Apr+Screenshots+preview) shows the ones from `main` in its Files changed tab.
+Screenshots are never committed. Every pull request that touches the frontend gets a comment with the popup rendered in each demo state (battery levels, charging, low battery, no battery; light, and dark for one of them), and the draft pull request [Screenshots preview](https://github.com/cthtrifork/kglance/pulls?q=is%3Apr+Screenshots+preview) shows the ones from `main` in its Files changed tab.
 
 ## Develop
 
@@ -58,7 +58,7 @@ Screenshots are never committed. Every pull request that touches the frontend ge
 make help       # every target, grouped
 make check      # gofmt, tidy, vet, tests (Go and frontend)
 make lint       # golangci-lint, Biome, knip
-make dev        # Vite dev server with hot reload; add ?demo=charging (battery|charging|low|ac) to the URL, and &update=staged|none|unknown to force the OS update pill
+make dev        # Vite dev server with hot reload; add ?demo=charging (battery|charging|low|ac|full|over-half|half|under-half) to the URL, and &update=staged|none|unknown to force the OS update pill
 make build      # the single binary, CGO-free; needs no GTK headers
 make rpm        # the Fedora package (needs the wails3 CLI: make wails3-install)
 make screenshots

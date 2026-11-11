@@ -142,6 +142,28 @@ hr {
   display: block;
 }
 
+/* The cell inside the battery icon shows the level (the drawing is 13 wide when full). */
+.icon .cell {
+  fill: var(--tone);
+  stroke: none;
+}
+
+#power[data-level="over-half"] .cell {
+  width: 10px;
+}
+
+#power[data-level="half"] .cell {
+  width: 6.5px;
+}
+
+#power[data-level="under-half"] .cell {
+  width: 3.5px;
+}
+
+#power[data-level="low"] .cell {
+  width: 1.5px;
+}
+
 .title {
   font-size: 18px;
   font-weight: 600;

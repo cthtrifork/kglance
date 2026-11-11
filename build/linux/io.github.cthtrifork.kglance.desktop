@@ -1,0 +1,14 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=KGlance
+GenericName=Clock and battery popup
+Comment=A glance at the time, the date and the battery
+Exec=/usr/bin/kglance
+Icon=io.github.cthtrifork.kglance
+Terminal=false
+Categories=Utility;
+Keywords=clock;time;date;battery;power;popup;
+StartupNotify=false
+# Matches the GTK application id the app sets (main.go), which is the Wayland app_id; the file name must be the same id.
+StartupWMClass=io.github.cthtrifork.kglance

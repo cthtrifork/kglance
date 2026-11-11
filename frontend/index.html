@@ -15,10 +15,23 @@
           <div id="date"></div>
         </section>
         <hr />
-        <section id="power" data-kind="ac">
-          <div class="power-text">
-            <div id="power-title"></div>
-            <div id="power-detail"></div>
+        <section id="power" data-kind="ac" data-low="false">
+          <div class="power-main">
+            <svg class="icon icon-battery" viewBox="0 0 24 24" aria-hidden="true">
+              <rect x="2" y="7" width="17" height="10" rx="2" />
+              <path d="M22 11v2" />
+            </svg>
+            <svg class="icon icon-charging" viewBox="0 0 24 24" aria-hidden="true">
+              <rect x="2" y="7" width="17" height="10" rx="2" />
+              <path d="M22 11v2M11.5 9.5L8.5 12.5h4l-3 3" />
+            </svg>
+            <svg class="icon icon-ac" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M9 2v5M15 2v5M6 7h12v4a6 6 0 0 1-12 0V7zM12 17v5" />
+            </svg>
+            <div class="power-text">
+              <div id="power-title"></div>
+              <div id="power-detail"></div>
+            </div>
           </div>
           <div id="power-bar" hidden><div id="power-fill"></div></div>
         </section>

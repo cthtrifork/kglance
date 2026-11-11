@@ -1,3 +1,30 @@
+/* Breeze-like palette. Light or dark follows the system (WebKitGTK reports the desktop's colour scheme). */
+:root {
+  color-scheme: light dark;
+  --card: #ffffff;
+  --text: #232629;
+  --muted: #5f666d;
+  --line: #e0e3e6;
+  --track: #e3e5e7;
+  --accent: #3daee9;
+  --good: #27ae60;
+  --warn: #da4453;
+  --shadow: 0 12px 32px rgb(0 0 0 / 0.22), 0 2px 6px rgb(0 0 0 / 0.12);
+  --border: #d5d8db;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --card: #232629;
+    --text: #fcfcfc;
+    --muted: #a1a9b1;
+    --line: #3a3e43;
+    --track: #3a3e43;
+    --border: #3a3e43;
+    --shadow: 0 12px 32px rgb(0 0 0 / 0.55), 0 2px 6px rgb(0 0 0 / 0.35);
+  }
+}
+
 * {
   box-sizing: border-box;
 }
@@ -8,11 +35,12 @@ body {
   height: 100%;
   background: transparent;
   overflow: hidden;
-  font-family: system-ui, sans-serif;
+  font-family: "Noto Sans", system-ui, sans-serif;
   user-select: none;
   cursor: default;
 }
 
+/* The backdrop is the whole transparent window; the card sits in its middle. */
 #backdrop {
   height: 100%;
   display: flex;
@@ -24,17 +52,10 @@ body {
   width: 270px;
   padding: 18px 20px 12px;
   border-radius: 12px;
-  background: Canvas;
-  color: CanvasText;
-  border: 1px solid color-mix(in srgb, CanvasText 12%, transparent);
-  box-shadow: 0 10px 30px rgb(0 0 0 / 0.35);
-}
-
-footer {
-  display: flex;
-  justify-content: space-between;
-  font-size: 10px;
-  opacity: 0.6;
+  background: var(--card);
+  color: var(--text);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow);
 }
 
 .time {
@@ -44,53 +65,100 @@ footer {
 }
 
 #time {
-  font-size: 44px;
+  font-size: 46px;
   font-weight: 300;
   font-variant-numeric: tabular-nums;
   line-height: 1.1;
+  letter-spacing: -0.5px;
 }
 
 #seconds {
   font-size: 15px;
-  opacity: 0.6;
+  color: var(--muted);
   font-variant-numeric: tabular-nums;
 }
 
 #date {
   margin-top: 2px;
   font-size: 12px;
-  opacity: 0.7;
+  color: var(--muted);
 }
 
 hr {
   border: 0;
-  border-top: 1px solid color-mix(in srgb, CanvasText 12%, transparent);
+  border-top: 1px solid var(--line);
   margin: 14px 0;
+}
+
+/* Power row: the colour says the state (blue on battery, green charging or full, red when low). */
+#power {
+  --tone: var(--accent);
+}
+
+#power[data-kind="charging"],
+#power[data-kind="full"] {
+  --tone: var(--good);
+}
+
+#power[data-low="true"] {
+  --tone: var(--warn);
+}
+
+.power-main {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.icon {
+  display: none;
+  flex: none;
+  width: 24px;
+  height: 24px;
+  fill: none;
+  stroke: var(--tone);
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+#power[data-kind="ac"] .icon-ac,
+#power[data-kind="battery"] .icon-battery,
+#power[data-kind="charging"] .icon-charging,
+#power[data-kind="full"] .icon-charging {
+  display: block;
 }
 
 #power-title {
   font-size: 18px;
   font-weight: 600;
+  line-height: 1.2;
 }
 
 #power-detail {
   font-size: 11px;
-  opacity: 0.7;
+  color: var(--muted);
 }
 
 #power-bar {
   margin-top: 10px;
   height: 6px;
   border-radius: 3px;
-  background: color-mix(in srgb, CanvasText 15%, transparent);
+  background: var(--track);
   overflow: hidden;
 }
 
 #power-fill {
   height: 100%;
-  background: currentColor;
+  border-radius: 3px;
+  background: var(--tone);
+  transition: width 0.3s ease;
 }
 
 footer {
   margin-top: 14px;
+  display: flex;
+  justify-content: space-between;
+  font-size: 10px;
+  color: var(--muted);
 }

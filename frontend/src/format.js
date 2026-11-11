@@ -12,32 +12,52 @@ export function formatDuration(seconds) {
 /**
  * What the power row shows for a state from the Go side ({present, percentage, status, secondsLeft}).
  * kind is "ac" (no battery), "battery", "charging" or "full"; percent is null when there is no bar;
- * low is true on a battery at or below LOW_PERCENT.
+ * low is true on a battery at or below LOW_PERCENT. bars (0 to 3) is how many bars the battery icon lights,
+ * and caution is true on a battery under half that is not yet low (the icon turns orange).
  */
 const LOW_PERCENT = 15;
+const HALF_PERCENT = 50;
+
+/** The lit bars of the battery icon for a percentage: 3 from 67%, 2 from 34%, 1 from 5%, else 0. */
+export function batteryBars(percent) {
+  if (percent >= 67) return 3;
+  if (percent >= 34) return 2;
+  if (percent >= 5) return 1;
+  return 0;
+}
 
 export function describePower(state) {
   if (!state?.present) {
-    return { kind: "ac", title: "On AC", detail: "No battery detected", percent: null, low: false };
+    return { kind: "ac", title: "On AC", detail: "No battery detected", percent: null, low: false, caution: false, bars: 0 };
   }
   const percent = Math.max(0, Math.min(100, Math.round(state.percentage)));
   const title = `${percent}%`;
   const left = formatDuration(state.secondsLeft);
   const low = percent <= LOW_PERCENT;
+  const bars = batteryBars(percent);
+  const caution = !low && percent < HALF_PERCENT;
   switch (state.status) {
     case "charging":
-      return { kind: "charging", title, detail: left ? `Charging · ${left} until full` : "Charging", percent, low: false };
+      return {
+        kind: "charging",
+        title,
+        detail: left ? `Charging · ${left} until full` : "Charging",
+        percent,
+        low: false,
+        caution: false,
+        bars,
+      };
     case "discharging":
-      return { kind: "battery", title, detail: left ? `On battery · ${left} left` : "On battery", percent, low };
+      return { kind: "battery", title, detail: left ? `On battery · ${left} left` : "On battery", percent, low, caution, bars };
     case "fully-charged":
-      return { kind: "full", title, detail: "Fully charged", percent, low: false };
+      return { kind: "full", title, detail: "Fully charged", percent, low: false, caution: false, bars };
     case "empty":
-      return { kind: "battery", title, detail: "Empty", percent, low: true };
+      return { kind: "battery", title, detail: "Empty", percent, low: true, caution: false, bars };
     case "pending-charge":
     case "pending-discharge":
-      return { kind: "battery", title, detail: "Not charging", percent, low: false };
+      return { kind: "battery", title, detail: "Not charging", percent, low: false, caution, bars };
     default:
-      return { kind: "battery", title, detail: "", percent, low: false };
+      return { kind: "battery", title, detail: "", percent, low: false, caution, bars };
   }
 }
 

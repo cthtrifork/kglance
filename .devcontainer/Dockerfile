@@ -3,7 +3,7 @@
 FROM mirror.gcr.io/library/golang:1.27-trixie AS go
 FROM mirror.gcr.io/library/node:26-trixie-slim AS node
 
-FROM mcr.microsoft.com/devcontainers/base:trixie
+FROM mcr.microsoft.com/devcontainers/base:trixie@sha256:38f9e6c291f054e3c868d95a5477cbfcf76c0fa7c218dda65dc6aa3fbfe06871
 
 COPY --from=go /usr/local/go /usr/local/go
 COPY --from=node /usr/local/bin/node /usr/local/bin/node

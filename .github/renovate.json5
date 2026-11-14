@@ -17,11 +17,13 @@
     'gomodTidy',
   ],
   platformCommit: 'enabled',
-  dependencyDashboard: true,
-  dependencyDashboardTitle: 'Dependency Dashboard',
-  dependencyDashboardLabels: [
-    'dependencies',
-  ],
+  dependencyDashboard: {
+    enabled: true,
+    title: 'Dependency Dashboard',
+    labels: [
+      'dependencies',
+    ],
+  },
   osvVulnerabilityAlerts: true,
   prHourlyLimit: 5,
   prConcurrentLimit: 10,

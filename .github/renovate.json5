@@ -50,6 +50,7 @@
         'minor',
       ],
       groupName: 'actions',
+      automerge: true,
     },
     {
       matchManagers: [

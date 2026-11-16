@@ -128,6 +128,16 @@
       ],
       enabled: false,
     },
+    {
+      // Renovate itself (the pinned renovate version and the renovatebot/github-action) moves in one PR and
+      // automerges for every update type. Last, so it wins over the rules above.
+      matchPackageNames: [
+        'renovate',
+        'renovatebot/github-action',
+      ],
+      groupName: 'renovate',
+      automerge: true,
+    },
   ],
   customManagers: [
     {

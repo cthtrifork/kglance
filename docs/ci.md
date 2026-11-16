@@ -8,7 +8,7 @@
 | `actions-lint.yml` | `.github/**` changes, weekly | zizmor, pinned actions, Renovate config validation |
 | `pr-title.yml` | PRs | Conventional Commits title check and label |
 | `release-drafter.yml` | push to `main` | Keeps the draft release notes and next version |
-| `renovate.yml` | schedule, and PRs that change its config | Self-hosted Renovate; a dry run on config PRs |
+| `renovate.yml` | daily schedule (fallback), and PRs that change its config | Self-hosted Renovate; a dry run on config PRs |
 | `update-branches.yml` | push to `main` | Merges `main` into the owner's open PRs that are behind |
 | `tag-release.yml`, `release.yml` | manual | Cut a release, see [releasing](releasing.md) |
 
@@ -31,11 +31,11 @@ Why an App and not `GITHUB_TOKEN`: PRs and pushes made with `GITHUB_TOKEN` start
 
 ## Renovate
 
-Self-hosted ([renovatebot/github-action](https://github.com/renovatebot/github-action)), config in `.github/renovate.json5`.
+Self-hosted ([renovatebot/github-action](https://github.com/renovatebot/github-action)), repo config in `.github/renovate.json5` and global options in `.github/workflows/renovate-config.js`. The in-cluster Renovate in `cthtrifork/talos-gitops` reads the same repo config and has its own global config (keep the two in step).
 
 - Updates Go modules, the frontend npm packages, SHA-pinned Actions, the Fedora container digest, the Go and Node versions in `.tool-versions`, and anything marked `# renovate: datasource=<ds> depName=<name>` (the Makefile tool versions, yamllint, zizmor, Trivy, govulncheck, the Renovate version).
 - A release must be 2 days old first. Patch and digest updates automerge once CI is green (so require the CI checks in the branch rules); minors are grouped per ecosystem; Go, Node, Wails and the Fedora release are reviewed by hand. Vite 8 is held back (its native bundler crashes on CPUs without AVX2) and Fedora stays on 44 until you decide otherwise.
-- Runs every two hours on `main` and by hand. A PR that changes `renovate.json5` or `renovate.yml` gets a dry run on its own branch: nothing is written, and the job summary lists what Renovate would do.
+- Runs once a day on `main` as the fallback (the cluster runs every 30 minutes) and by hand. A PR that changes `renovate.json5`, `renovate-config.js` or `renovate.yml` gets a dry run on its own branch: nothing is written, and the job summary lists what Renovate would do.
 - Commits go through the API as the App (`platformCommit`), so they are verified.
 
 ## Screenshots

@@ -136,6 +136,7 @@
         'renovatebot/github-action',
       ],
       groupName: 'renovate',
+      separateMajorMinor: false,
       automerge: true,
     },
   ],

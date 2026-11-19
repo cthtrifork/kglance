@@ -33,7 +33,7 @@ NPM_CI := npm ci --ignore-scripts --no-audit --no-fund
 # renovate: datasource=github-releases depName=golangci/golangci-lint
 GOLANGCI_LINT_VERSION := v2.15.0
 # renovate: datasource=go depName=golang.org/x/tools
-GOIMPORTS_VERSION := v0.52.0
+GOIMPORTS_VERSION := v0.53.0
 
 .DEFAULT_GOAL := help
 .PHONY: help check test vet lint lint-go lint-frontend fmt format format-frontend tools \
